@@ -1,0 +1,125 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { tournamentsAPI } from '../services/api';
+import { Loader2 } from 'lucide-react';
+
+export default function CreateTournamentPage() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    startDate: '', 
+    endDate: '', 
+    description: '',
+    location: '' 
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      await tournamentsAPI.create(formData);
+      navigate('/');
+    } catch (err) {
+      setError(err.message || 'Failed to create tournament');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <h2 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">Create Tournament</h2>
+      <p className="text-slate-500 mb-8">Set up a new pickleball tournament</p>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2">Tournament Name *</label>
+            <input 
+              type="text" 
+              value={formData.name} 
+              onChange={(e) => setFormData({...formData, name: e.target.value})} 
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+              required 
+            />
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Start Date *</label>
+              <input 
+                type="date" 
+                value={formData.startDate} 
+                onChange={(e) => setFormData({...formData, startDate: e.target.value})} 
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                required 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">End Date *</label>
+              <input 
+                type="date" 
+                value={formData.endDate} 
+                onChange={(e) => setFormData({...formData, endDate: e.target.value})} 
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                required 
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2">Location</label>
+            <input 
+              type="text" 
+              value={formData.location} 
+              onChange={(e) => setFormData({...formData, location: e.target.value})} 
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+              placeholder="e.g., Phoenix, AZ"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2">Description</label>
+            <textarea 
+              value={formData.description} 
+              onChange={(e) => setFormData({...formData, description: e.target.value})} 
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+              rows="4"
+              placeholder="Tell us about this tournament..."
+            ></textarea>
+          </div>
+        </div>
+        <div className="flex gap-4 mt-8">
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              'Create Tournament'
+            )}
+          </button>
+          <button 
+            type="button" 
+            onClick={() => navigate('/')} 
+            className="flex-1 bg-slate-200 text-slate-700 px-6 py-3 rounded-xl hover:bg-slate-300 transition-all font-semibold"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
