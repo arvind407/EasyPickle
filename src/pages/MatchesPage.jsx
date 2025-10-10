@@ -28,8 +28,10 @@ export default function MatchesPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner />
+      <div className="relative min-h-screen">
+        <div className="absolute inset-0 flex justify-center items-center">
+          <LoadingSpinner />
+        </div>
       </div>
     );
   }

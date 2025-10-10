@@ -95,8 +95,10 @@ export default function StandingsPage() {
       )}
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <LoadingSpinner />
+        <div className="relative min-h-screen">
+          <div className="absolute inset-0 flex justify-center items-center">
+            <LoadingSpinner />
+          </div>
         </div>
       ) : !selectedTournament ? (
         <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl">
