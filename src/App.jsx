@@ -14,6 +14,9 @@ import MatchesPage from './pages/MatchesPage';
 import ScheduleMatchPage from './pages/ScheduleMatchPage';
 import ScoreMatchPage from './pages/ScoreMatchPage';
 import StandingsPage from './pages/StandingsPage';
+import EditTournamentPage from './pages/EditTournamentPage';
+import EditTeamPage from './pages/EditTeamPage';
+import RegisterPage from './pages/RegisterPage';
 
 function AppRoutes() {
   const { checkAuth } = useAuth();
@@ -105,6 +108,24 @@ function AppRoutes() {
           </MainLayout>
         </ProtectedRoute>
       } />
+
+      <Route path="/tournaments/:id/edit" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <EditTournamentPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/teams/:id/edit" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <EditTeamPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/register" element={<RegisterPage />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

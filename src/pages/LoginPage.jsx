@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Trophy, Lock, User, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isLoading } = useAuth();
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  
+  // Get success message from registration redirect
+  const successMessage = location.state?.message;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,6 +45,13 @@ export default function LoginPage() {
         {/* Login Form */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
           <h2 className="text-2xl font-bold text-slate-800 mb-6">Sign In</h2>
+          
+          {/* Success message from registration */}
+          {successMessage && (
+            <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm font-medium">
+              {successMessage}
+            </div>
+          )}
           
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium">
@@ -94,6 +105,19 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+          
+          {/* Registration Link */}
+          <div className="mt-6 text-center">
+            <p className="text-slate-600">
+              Don't have an account?{' '}
+              <Link 
+                to="/register" 
+                className="font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+              >
+                Create Account
+              </Link>
+            </p>
+          </div>
         </div>
 
         <p className="text-center text-slate-400 text-sm mt-6">
