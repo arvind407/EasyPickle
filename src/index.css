@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slideDown {
+    animation: slideDown 0.2s ease-out;
+  }
+}
+
+/* Improve mobile input focus */
+@layer base {
+  input, select, textarea {
+    @apply text-base;
+  }
+  
+  /* Prevent zoom on iOS when focusing inputs */
+  @media screen and (max-width: 768px) {
+    select, textarea, input {
+      font-size: 16px !important;
+    }
+  }
+}

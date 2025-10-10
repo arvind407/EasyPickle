@@ -9,7 +9,6 @@ import CreateTournamentPage from './pages/CreateTournamentPage';
 import TeamsPage from './pages/TeamsPage';
 import CreateTeamPage from './pages/CreateTeamPage';
 import PlayersPage from './pages/PlayersPage';
-import CreatePlayerPage from './pages/CreatePlayerPage';
 import MatchesPage from './pages/MatchesPage';
 import ScheduleMatchPage from './pages/ScheduleMatchPage';
 import ScoreMatchPage from './pages/ScoreMatchPage';
@@ -65,14 +64,6 @@ function AppRoutes() {
         <ProtectedRoute>
           <MainLayout>
             <PlayersPage />
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/players/create" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <CreatePlayerPage />
           </MainLayout>
         </ProtectedRoute>
       } />

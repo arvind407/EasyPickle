@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { matchesAPI, tournamentsAPI, teamsAPI } from '../services/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function ScheduleMatchPage() {
   const navigate = useNavigate();
@@ -64,23 +64,36 @@ export default function ScheduleMatchPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">Schedule Match</h2>
-      <p className="text-slate-500 mb-8">Set up a new match between teams</p>
+      {/* Mobile Back Button */}
+      <button
+        onClick={() => navigate('/matches')}
+        className="mb-4 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors touch-manipulation active:scale-95 sm:hidden"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span className="font-medium">Back</span>
+      </button>
+
+      <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        Schedule Match
+      </h2>
+      <p className="text-slate-500 mb-6 text-sm sm:text-base">Set up a new match between teams</p>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl">
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
-        <div className="space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-4 sm:p-8 border border-white/20">
+        <div className="space-y-5">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Tournament</label>
+            <label className="block text-sm font-bold text-slate-700 mb-2">
+              Tournament
+            </label>
             <select 
               value={formData.tournamentId} 
               onChange={(e) => setFormData({...formData, tournamentId: e.target.value})} 
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base"
             >
               <option value="">Select Tournament (Optional)</option>
               {tournaments.map(tournament => (
@@ -90,13 +103,16 @@ export default function ScheduleMatchPage() {
               ))}
             </select>
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Team 1 *</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                Team 1 *
+              </label>
               <select 
                 value={formData.team1Id} 
                 onChange={(e) => setFormData({...formData, team1Id: e.target.value})} 
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base" 
                 required
               >
                 <option value="">Select Team</option>
@@ -108,11 +124,13 @@ export default function ScheduleMatchPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Team 2 *</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                Team 2 *
+              </label>
               <select 
                 value={formData.team2Id} 
                 onChange={(e) => setFormData({...formData, team2Id: e.target.value})} 
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base" 
                 required
               >
                 <option value="">Select Team</option>
@@ -124,44 +142,53 @@ export default function ScheduleMatchPage() {
               </select>
             </div>
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Date *</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                Date *
+              </label>
               <input 
                 type="date" 
                 value={formData.matchDate} 
                 onChange={(e) => setFormData({...formData, matchDate: e.target.value})} 
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base" 
                 required 
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Time *</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                Time *
+              </label>
               <input 
                 type="time" 
                 value={formData.matchTime} 
                 onChange={(e) => setFormData({...formData, matchTime: e.target.value})} 
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base" 
                 required 
               />
             </div>
           </div>
+
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Court</label>
+            <label className="block text-sm font-bold text-slate-700 mb-2">
+              Court
+            </label>
             <input 
               type="text" 
               value={formData.court} 
               onChange={(e) => setFormData({...formData, court: e.target.value})} 
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base" 
               placeholder="e.g., Court 1"
             />
           </div>
         </div>
-        <div className="flex gap-4 mt-8">
+
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <button 
             type="submit" 
             disabled={loading}
-            className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2 touch-manipulation active:scale-95"
           >
             {loading ? (
               <>
@@ -175,7 +202,7 @@ export default function ScheduleMatchPage() {
           <button 
             type="button" 
             onClick={() => navigate('/matches')} 
-            className="flex-1 bg-slate-200 text-slate-700 px-6 py-3 rounded-xl hover:bg-slate-300 transition-all font-semibold"
+            className="flex-1 bg-slate-200 text-slate-700 px-6 py-3 rounded-xl hover:bg-slate-300 transition-all font-semibold touch-manipulation active:scale-95"
           >
             Cancel
           </button>
