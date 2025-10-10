@@ -26,18 +26,18 @@ export default function PlayersPage() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (username) => {
     if (!confirm('Are you sure you want to delete this player?')) return;
 
     try {
-      await playersAPI.delete(id);
-      setPlayers(players.filter(p => p.playerId !== id));
+      await playersAPI.delete(username);
+      setPlayers(players.filter(p => p.username !== username));
     } catch (err) {
       alert('Failed to delete player: ' + err.message);
     }
   };
 
-  const handleEdit = async (id) => {
+  const handleEdit = async (username) => {
     alert("Edit Page is in progress ....")
   };
 
@@ -94,10 +94,10 @@ export default function PlayersPage() {
                     <td className="px-6 py-4 font-bold text-indigo-600">{player.totalPoints || 0}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button onClick={() => handleEdit(player.playerId)} className="text-slate-600 hover:text-indigo-600 transition-colors p-2 hover:bg-indigo-50 rounded-lg">
+                        {/* <button onClick={() => handleEdit(player.username)} className="text-slate-600 hover:text-indigo-600 transition-colors p-2 hover:bg-indigo-50 rounded-lg">
                           <Edit className="w-5 h-5" />
-                        </button>
-                        <button onClick={() => handleDelete(player.playerId)} className="text-slate-600 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg">
+                        </button> */}
+                        <button onClick={() => handleDelete(player.username)} className="text-slate-600 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg">
                           <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
