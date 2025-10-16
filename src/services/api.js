@@ -152,6 +152,14 @@ export const matchesAPI = {
       body: JSON.stringify(matchData)
     }),
   
+  // Update live score (without completing the match)
+  updateLiveScore: (id, scoreData) => 
+    apiCall(`/matches/${id}/live-score`, {
+      method: 'PUT',
+      body: JSON.stringify(scoreData)
+    }),
+  
+  // Complete the match with final score
   score: (id, scoreData) => 
     apiCall(`/matches/${id}/score`, {
       method: 'PUT',

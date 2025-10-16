@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -19,12 +18,6 @@ import EditTeamPage from './pages/EditTeamPage';
 import RegisterPage from './pages/RegisterPage';
 
 function AppRoutes() {
-  const { checkAuth } = useAuth();
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
@@ -121,14 +114,12 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Score Match - Admin only */}
+      {/* Score Match - Accessible to all authenticated users */}
       <Route path="/matches/:id/score" element={
         <ProtectedRoute>
-          <AdminRoute>
-            <MainLayout>
-              <ScoreMatchPage />
-            </MainLayout>
-          </AdminRoute>
+          <MainLayout>
+            <ScoreMatchPage />
+          </MainLayout>
         </ProtectedRoute>
       } />
       

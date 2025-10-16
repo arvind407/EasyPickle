@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getUserFromToken} from '../utils/jwtUtils'
+import { getUserFromToken } from '../utils/jwtUtils';
 
 const AuthContext = createContext();
 
@@ -8,26 +8,37 @@ const API_URL = import.meta.env.VITE_API_URL || "https://c45bjd0f8i.execute-api.
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start as true
   const [token, setToken] = useState(null);
 
   // Check for existing token on mount
   useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = () => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
     if (storedToken && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
+        const userFromToken = getUserFromToken(storedToken);
+        
+        // Use token data if available, fallback to stored user
+        const finalUser = userFromToken || parsedUser;
+        
         setToken(storedToken);
-        setUser(parsedUser);
+        setUser(finalUser);
         setIsAuthenticated(true);
       } catch (error) {
         console.error('Error parsing stored user:', error);
         logout();
       }
     }
-  }, []);
+    
+    setIsLoading(false); // Always set loading to false after check
+  };
 
   const login = async (username, password) => {
     setIsLoading(true);
@@ -83,11 +94,6 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-  };
-
-  const checkAuth = () => {
-    const storedToken = localStorage.getItem('token');
-    return !!storedToken;
   };
 
   // Helper function to check if user is admin

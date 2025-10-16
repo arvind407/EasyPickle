@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Plus } from 'lucide-react';
+import { Calendar, Plus, Eye, RefreshCw } from 'lucide-react';
 import { matchesAPI } from '../services/api';
 import { useRole } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -8,6 +8,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 export default function MatchesPage() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   
   const { canCreate, canEdit } = useRole();
@@ -29,7 +30,20 @@ export default function MatchesPage() {
     }
   };
 
-  if (loading) {
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      const response = await matchesAPI.getAll();
+      setMatches(response.data || []);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to refresh matches');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  if (loading && matches.length === 0) {
     return (
       <div className="relative min-h-screen">
         <div className="absolute inset-0 flex justify-center items-center">
@@ -50,15 +64,29 @@ export default function MatchesPage() {
             {canCreate ? 'Schedule and score matches' : 'View match schedule and results'}
           </p>
         </div>
-        {canCreate && (
-          <Link 
-            to="/matches/schedule" 
-            className="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 sm:px-6 sm:py-3 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all font-semibold touch-manipulation active:scale-95"
+        <div className="flex gap-2">
+          {/* Refresh Button */}
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex-shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-700 p-3 sm:px-5 sm:py-3 rounded-xl flex items-center gap-2 transition-all font-semibold touch-manipulation active:scale-95 disabled:opacity-50"
+            title="Refresh matches"
           >
-            <Plus className="w-5 h-5" />
-            <span className="hidden sm:inline">Schedule</span>
-          </Link>
-        )}
+            <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+          </button>
+          
+          {/* Create Button */}
+          {canCreate && (
+            <Link 
+              to="/matches/schedule" 
+              className="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 sm:px-6 sm:py-3 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all font-semibold touch-manipulation active:scale-95"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="hidden sm:inline">Schedule</span>
+            </Link>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -95,8 +123,11 @@ export default function MatchesPage() {
                 <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
                   match.status === 'Completed' 
                     ? 'bg-slate-500 text-white' 
+                    : match.status === 'In Progress'
+                    ? 'bg-red-500 text-white animate-pulse'
                     : 'bg-blue-500 text-white'
                 }`}>
+                  {match.status === 'In Progress' && '🔴 '}
                   {match.status}
                 </span>
                 <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
@@ -113,9 +144,11 @@ export default function MatchesPage() {
                   <span className="font-bold text-slate-800 text-base sm:text-lg block">
                     {match.team1Name}
                   </span>
-                  {match.status === 'Completed' && (
-                    <span className="text-2xl sm:text-3xl font-bold text-emerald-500 block mt-1">
-                      {match.team1Score}
+                  {(match.status === 'Completed' || match.status === 'In Progress') && (
+                    <span className={`text-2xl sm:text-3xl font-bold block mt-1 ${
+                      match.status === 'In Progress' ? 'text-indigo-600' : 'text-emerald-500'
+                    }`}>
+                      {match.team1Score || 0}
                     </span>
                   )}
                 </div>
@@ -126,22 +159,40 @@ export default function MatchesPage() {
                   <span className="font-bold text-slate-800 text-base sm:text-lg block">
                     {match.team2Name}
                   </span>
-                  {match.status === 'Completed' && (
-                    <span className="text-2xl sm:text-3xl font-bold text-red-500 block mt-1">
-                      {match.team2Score}
+                  {(match.status === 'Completed' || match.status === 'In Progress') && (
+                    <span className={`text-2xl sm:text-3xl font-bold block mt-1 ${
+                      match.status === 'In Progress' ? 'text-purple-600' : 'text-red-500'
+                    }`}>
+                      {match.team2Score || 0}
                     </span>
                   )}
                 </div>
               </div>
 
-              {match.status === 'Scheduled' && canEdit && (
-                <Link 
-                  to={`/matches/${match.matchId}/score`} 
-                  className="mt-4 w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all font-semibold text-center block touch-manipulation active:scale-95"
-                >
-                  Score Match
-                </Link>
-              )}
+              {/* Action buttons */}
+              <div className="mt-4 flex gap-2">
+                {match.status === 'Scheduled' && canEdit && (
+                  <Link 
+                    to={`/matches/${match.matchId}/score`} 
+                    className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all font-semibold text-center touch-manipulation active:scale-95"
+                  >
+                    Start Match
+                  </Link>
+                )}
+                
+                {match.status === 'In Progress' && canEdit && (
+                  <Link 
+                    to={`/matches/${match.matchId}/score`} 
+                    className="flex-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all font-semibold text-center flex items-center justify-center gap-2 touch-manipulation active:scale-95"
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    Continue Scoring
+                  </Link>
+                )}
+              </div>
             </div>
           ))}
         </div>
