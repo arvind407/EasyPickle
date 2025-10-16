@@ -43,7 +43,7 @@ export default function MainLayout({ children }) {
             </button>
             
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-4">
+            {/* <div className="hidden lg:flex items-center gap-4">
               <nav className="flex gap-2">
                 <NavLink to="/" icon={Trophy} label="Tournaments" active={isActive('/')} />
                 <NavLink to="/teams" icon={Users} label="Teams" active={isActive('/teams')} />
@@ -62,11 +62,11 @@ export default function MainLayout({ children }) {
                   <span>Logout</span>
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
           
           {/* Mobile Menu Dropdown */}
-          {menuOpen && (
+          {/* {menuOpen && (
             <nav className="lg:hidden mt-4 pb-2 space-y-1 animate-slideDown">
               <MobileNavLink to="/" icon={Home} label="Home" active={isActive('/')} onClick={closeMenu} />
               <MobileNavLink to="/teams" icon={Users} label="Teams" active={isActive('/teams')} onClick={closeMenu} />
@@ -88,7 +88,7 @@ export default function MainLayout({ children }) {
                 </button>
               </div>
             </nav>
-          )}
+          )} */}
         </div>
       </header>
       

@@ -1,46 +1,26 @@
+// src/pages/TournamentStandingsPage.jsx
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Trophy, Medal } from 'lucide-react';
-import { standingsAPI, tournamentsAPI } from '../services/api';
+import { standingsAPI } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-export default function StandingsPage() {
+export default function TournamentStandingsPage() {
+  const { id } = useParams(); // Tournament ID
   const [standings, setStandings] = useState([]);
-  const [tournaments, setTournaments] = useState([]);
-  const [selectedTournament, setSelectedTournament] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchTournaments();
-  }, []);
-
-  useEffect(() => {
-    if (selectedTournament) {
+    if (id) {
       fetchStandings();
     }
-  }, [selectedTournament]);
-
-  const fetchTournaments = async () => {
-    try {
-      const response = await tournamentsAPI.getAll();
-      const tournamentList = response.data || [];
-      setTournaments(tournamentList);
-      
-      const activeTournament = tournamentList.find(t => t.status === 'Active');
-      if (activeTournament) {
-        setSelectedTournament(activeTournament.tournamentId);
-      } else if (tournamentList.length > 0) {
-        setSelectedTournament(tournamentList[0].tournamentId);
-      }
-    } catch (err) {
-      console.error('Failed to load tournaments:', err);
-    }
-  };
+  }, [id]);
 
   const fetchStandings = async () => {
     try {
       setLoading(true);
-      const response = await standingsAPI.getByTournament(selectedTournament);
+      const response = await standingsAPI.getByTournament(id);
       setStandings(response.data || []);
       setError('');
     } catch (err) {
@@ -63,6 +43,16 @@ export default function StandingsPage() {
     return null;
   };
 
+  if (loading) {
+    return (
+      <div className="relative min-h-screen">
+        <div className="absolute inset-0 flex justify-center items-center">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -72,39 +62,13 @@ export default function StandingsPage() {
         <p className="text-slate-500 text-sm sm:text-base">Tournament leaderboard</p>
       </div>
 
-      <div className="mb-6">
-        <label className="block text-sm font-bold text-slate-700 mb-2">Select Tournament</label>
-        <select
-          value={selectedTournament}
-          onChange={(e) => setSelectedTournament(e.target.value)}
-          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base"
-        >
-          <option value="">Select a tournament</option>
-          {tournaments.map(tournament => (
-            <option key={tournament.tournamentId} value={tournament.tournamentId}>
-              {tournament.name} ({tournament.status})
-            </option>
-          ))}
-        </select>
-      </div>
-
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm">
           {error}
         </div>
       )}
 
-      {loading ? (
-        <div className="relative min-h-screen">
-          <div className="absolute inset-0 flex justify-center items-center">
-            <LoadingSpinner />
-          </div>
-        </div>
-      ) : !selectedTournament ? (
-        <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl">
-          <p className="text-slate-500 text-sm">Please select a tournament to view standings</p>
-        </div>
-      ) : standings.length === 0 ? (
+      {standings.length === 0 ? (
         <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl">
           <Trophy className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <p className="text-slate-500 text-sm px-4">No standings available yet. Teams need to play matches first.</p>
@@ -163,7 +127,7 @@ export default function StandingsPage() {
                 {standings.map(team => (
                   <tr key={team.teamId} className="hover:bg-indigo-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg bg-gradient-to-br ${getRankColor(team.rank)}`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg bg-gradient-to-br`}>
                         {<span className="text-slate-600">{team.rank}</span>}
                       </div>
                     </td>

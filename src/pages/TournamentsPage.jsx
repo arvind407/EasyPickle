@@ -1,12 +1,15 @@
+// src/pages/TournamentsPage.jsx - UPDATED VERSION
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Trophy, Plus, Edit, Trash2, Search, Calendar, MapPin } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Trophy, Plus, Edit, Trash2, Search, Calendar, MapPin, ChevronRight } from 'lucide-react';
 import { tournamentsAPI } from '../services/api';
 import { useRole } from '../context/AuthContext';
+import { useTournament } from '../context/TournamentContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { formatDateRange } from '../utils/dateUtils';
 
 export default function TournamentsPage() {
+  const navigate = useNavigate();
   const [tournaments, setTournaments] = useState([]);
   const [filteredTournaments, setFilteredTournaments] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,6 +17,7 @@ export default function TournamentsPage() {
   const [error, setError] = useState('');
   
   const { canCreate, canEdit, canDelete } = useRole();
+  const { selectTournament } = useTournament();
 
   useEffect(() => {
     fetchTournaments();
@@ -52,7 +56,13 @@ export default function TournamentsPage() {
     setFilteredTournaments(filtered);
   };
 
-  const handleDelete = async (id, name) => {
+  const handleTournamentClick = (tournament) => {
+    selectTournament(tournament);
+    navigate(`/tournament/${tournament.tournamentId}`);
+  };
+
+  const handleDelete = async (e, id, name) => {
+    e.stopPropagation(); // Prevent tournament click
     if (!canDelete) {
       alert('You do not have permission to delete tournaments');
       return;
@@ -87,7 +97,7 @@ export default function TournamentsPage() {
               Tournaments
             </h2>
             <p className="text-slate-500 text-sm sm:text-base">
-              {canCreate ? 'Manage your pickleball tournaments' : 'View pickleball tournaments'}
+              {canCreate ? 'Select a tournament to manage' : 'Select a tournament to view'}
             </p>
           </div>
           {canCreate && (
@@ -145,20 +155,23 @@ export default function TournamentsPage() {
         </div>
       ) : (
         <>
-          {/* Mobile Card View */}
-          <div className="space-y-4 sm:hidden">
+          {/* Tournament Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTournaments.map(tournament => (
               <div 
                 key={tournament.tournamentId} 
-                className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-white/20 active:shadow-xl transition-all"
+                onClick={() => handleTournamentClick(tournament)}
+                className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-white/20 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group"
               >
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                       <Trophy className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-slate-800 truncate text-lg">{tournament.name}</h3>
+                      <h3 className="font-bold text-slate-800 truncate text-lg group-hover:text-indigo-600 transition-colors">
+                        {tournament.name}
+                      </h3>
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-1 ${
                         tournament.status === 'Active' 
                           ? 'bg-emerald-500 text-white' 
@@ -170,6 +183,8 @@ export default function TournamentsPage() {
                       </span>
                     </div>
                   </div>
+                  
+                  <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
                 </div>
 
                 <div className="space-y-2 mb-4 text-sm">
@@ -186,11 +201,12 @@ export default function TournamentsPage() {
                 </div>
 
                 {(canEdit || canDelete) && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-4 border-t border-slate-200">
                     {canEdit && (
                       <Link 
                         to={`/tournaments/${tournament.tournamentId}/edit`}
-                        className="flex-1 flex items-center justify-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2.5 rounded-xl hover:bg-indigo-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 flex items-center justify-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl hover:bg-indigo-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
                       >
                         <Edit className="w-4 h-4" />
                         Edit
@@ -198,8 +214,8 @@ export default function TournamentsPage() {
                     )}
                     {canDelete && (
                       <button 
-                        onClick={() => handleDelete(tournament.tournamentId, tournament.name)}
-                        className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-2.5 rounded-xl hover:bg-red-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
+                        onClick={(e) => handleDelete(e, tournament.tournamentId, tournament.name)}
+                        className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-xl hover:bg-red-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
                       >
                         <Trash2 className="w-4 h-4" />
                         Delete
@@ -211,89 +227,8 @@ export default function TournamentsPage() {
             ))}
           </div>
 
-          {/* Desktop Table View */}
-          <div className="hidden sm:block bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/20">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-bold">Tournament Name</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold">Dates</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold">Location</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold">Status</th>
-                    {(canEdit || canDelete) && (
-                      <th className="px-6 py-4 text-center text-sm font-bold">Actions</th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredTournaments.map(tournament => (
-                    <tr key={tournament.tournamentId} className="hover:bg-indigo-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <Trophy className="w-5 h-5 text-white" />
-                          </div>
-                          <span className="font-bold text-slate-800">{tournament.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-slate-600 font-medium whitespace-nowrap">
-                        {formatDateRange(tournament.startDate, tournament.endDate)}
-                      </td>
-                      <td className="px-6 py-4 text-slate-600 font-medium">
-                        {tournament.location || '-'}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                          tournament.status === 'Active' 
-                            ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' 
-                            : tournament.status === 'Completed'
-                            ? 'bg-gradient-to-r from-slate-500 to-slate-600 text-white'
-                            : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white'
-                        }`}>
-                          {tournament.status}
-                        </span>
-                      </td>
-                      {(canEdit || canDelete) && (
-                        <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2">
-                            {canEdit && (
-                              <Link 
-                                to={`/tournaments/${tournament.tournamentId}/edit`}
-                                className="text-slate-600 hover:text-indigo-600 transition-colors p-2 hover:bg-indigo-50 rounded-lg"
-                                title="Edit tournament"
-                              >
-                                <Edit className="w-5 h-5" />
-                              </Link>
-                            )}
-                            {canDelete && (
-                              <button 
-                                onClick={() => handleDelete(tournament.tournamentId, tournament.name)}
-                                className="text-slate-600 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                                title="Delete tournament"
-                              >
-                                <Trash2 className="w-5 h-5" />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            
-            {/* Results count */}
-            <div className="px-6 py-3 bg-slate-50 border-t border-slate-200">
-              <p className="text-sm text-slate-600">
-                Showing <span className="font-semibold">{filteredTournaments.length}</span> of <span className="font-semibold">{tournaments.length}</span> tournaments
-              </p>
-            </div>
-          </div>
-
-          {/* Mobile Results Count */}
-          <div className="sm:hidden mt-4 text-center">
+          {/* Results count */}
+          <div className="mt-6 text-center">
             <p className="text-sm text-slate-600">
               Showing <span className="font-semibold">{filteredTournaments.length}</span> of <span className="font-semibold">{tournaments.length}</span> tournaments
             </p>

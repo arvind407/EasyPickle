@@ -1,21 +1,29 @@
+// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { TournamentProvider } from './context/TournamentContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import MainLayout from './layouts/MainLayout';
+import TournamentLayout from './layouts/TournamentLayout';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import TournamentsPage from './pages/TournamentsPage';
 import CreateTournamentPage from './pages/CreateTournamentPage';
-import TeamsPage from './pages/TeamsPage';
+import EditTournamentPage from './pages/EditTournamentPage';
+
+// Tournament-specific pages
+import TournamentHomePage from './pages/TournamentHomePage';
+import TournamentMatchesPage from './pages/TournamentMatchesPage';
+import TournamentTeamsPage from './pages/TournamentTeamsPage';
+import TournamentStandingsPage from './pages/TournamentStandingsPage';
+
+// Other pages
 import CreateTeamPage from './pages/CreateTeamPage';
+import EditTeamPage from './pages/EditTeamPage';
 import PlayersPage from './pages/PlayersPage';
-import MatchesPage from './pages/MatchesPage';
 import ScheduleMatchPage from './pages/ScheduleMatchPage';
 import ScoreMatchPage from './pages/ScoreMatchPage';
-import StandingsPage from './pages/StandingsPage';
-import EditTournamentPage from './pages/EditTournamentPage';
-import EditTeamPage from './pages/EditTeamPage';
-import RegisterPage from './pages/RegisterPage';
 
 function AppRoutes() {
   return (
@@ -23,7 +31,7 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       
-      {/* Home - Tournaments (accessible to all authenticated users) */}
+      {/* Home - Tournaments List (accessible to all authenticated users) */}
       <Route path="/" element={
         <ProtectedRoute>
           <MainLayout>
@@ -54,16 +62,40 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Teams (accessible to all authenticated users) */}
-      <Route path="/teams" element={
+      {/* Tournament Detail Routes */}
+      <Route path="/tournament/:id" element={
         <ProtectedRoute>
-          <MainLayout>
-            <TeamsPage />
-          </MainLayout>
+          <TournamentLayout>
+            <TournamentHomePage />
+          </TournamentLayout>
         </ProtectedRoute>
       } />
       
-      {/* Create Team - Admin only */}
+      <Route path="/tournament/:id/matches" element={
+        <ProtectedRoute>
+          <TournamentLayout>
+            <TournamentMatchesPage />
+          </TournamentLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/tournament/:id/teams" element={
+        <ProtectedRoute>
+          <TournamentLayout>
+            <TournamentTeamsPage />
+          </TournamentLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/tournament/:id/standings" element={
+        <ProtectedRoute>
+          <TournamentLayout>
+            <TournamentStandingsPage />
+          </TournamentLayout>
+        </ProtectedRoute>
+      } />
+      
+      {/* Team Management Routes */}
       <Route path="/teams/create" element={
         <ProtectedRoute>
           <AdminRoute>
@@ -74,7 +106,6 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Edit Team - Admin only */}
       <Route path="/teams/:id/edit" element={
         <ProtectedRoute>
           <AdminRoute>
@@ -85,7 +116,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Players (accessible to all authenticated users) */}
+      {/* Players Page - Global view */}
       <Route path="/players" element={
         <ProtectedRoute>
           <MainLayout>
@@ -94,16 +125,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Matches (accessible to all authenticated users) */}
-      <Route path="/matches" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <MatchesPage />
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-      
-      {/* Schedule Match - Admin only */}
+      {/* Match Management Routes */}
       <Route path="/matches/schedule" element={
         <ProtectedRoute>
           <AdminRoute>
@@ -114,20 +136,10 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Score Match - Accessible to all authenticated users */}
       <Route path="/matches/:id/score" element={
         <ProtectedRoute>
           <MainLayout>
             <ScoreMatchPage />
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-      
-      {/* Standings (accessible to all authenticated users) */}
-      <Route path="/standings" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <StandingsPage />
           </MainLayout>
         </ProtectedRoute>
       } />
@@ -140,9 +152,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
+      <TournamentProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </TournamentProvider>
     </AuthProvider>
   );
 }
