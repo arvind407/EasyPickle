@@ -1,11 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { getUserFromToken} from '../utils/jwtUtils'
 
 const AuthContext = createContext();
 
 const API_URL = import.meta.env.VITE_API_URL || "https://c45bjd0f8i.execute-api.us-west-2.amazonaws.com/prod";
-
-// Add this console log to debug
-console.log('API_URL:', API_URL);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -20,8 +18,9 @@ export function AuthProvider({ children }) {
     
     if (storedToken && storedUser) {
       try {
+        const parsedUser = JSON.parse(storedUser);
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        setUser(parsedUser);
         setIsAuthenticated(true);
       } catch (error) {
         console.error('Error parsing stored user:', error);
@@ -36,8 +35,6 @@ export function AuthProvider({ children }) {
     try {
       const requestBody = { username, password };
       console.log('Sending login request to:', `${API_URL}/auth/login`);
-      console.log('Request body:', requestBody);
-
 
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
@@ -52,12 +49,13 @@ export function AuthProvider({ children }) {
       console.log('Response data:', data);
 
       if (response.ok && data.success) {
-        // Store token and user
+        // Store token and user (including role)
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         
         setToken(data.token);
-        setUser(data.user);
+        const userFromToken = getUserFromToken(data.token);
+        setUser(userFromToken);
         setIsAuthenticated(true);
         setIsLoading(false);
         
@@ -92,6 +90,16 @@ export function AuthProvider({ children }) {
     return !!storedToken;
   };
 
+  // Helper function to check if user is admin
+  const isAdmin = () => {
+    return user?.role === 'admin';
+  };
+
+  // Helper function to check if user is player
+  const isPlayer = () => {
+    return user?.role === 'player';
+  };
+
   // Helper function to get authorization headers for API calls
   const getAuthHeaders = () => {
     if (token) {
@@ -114,7 +122,9 @@ export function AuthProvider({ children }) {
       login, 
       logout, 
       checkAuth,
-      getAuthHeaders 
+      getAuthHeaders,
+      isAdmin,
+      isPlayer
     }}>
       {children}
     </AuthContext.Provider>
@@ -127,4 +137,19 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+}
+
+// Custom hook for role-based access control
+export function useRole() {
+  const { user, isAdmin, isPlayer } = useAuth();
+  
+  return {
+    role: user?.role || null,
+    isAdmin: isAdmin(),
+    isPlayer: isPlayer(),
+    canEdit: isAdmin(),
+    canDelete: isAdmin(),
+    canCreate: isAdmin(),
+    canView: true // Everyone can view
+  };
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Plus, Edit, Trash2, Search } from 'lucide-react';
 import { teamsAPI } from '../services/api';
+import { useRole } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function TeamsPage() {
@@ -10,6 +11,8 @@ export default function TeamsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const { canCreate, canEdit, canDelete } = useRole();
 
   useEffect(() => {
     fetchTeams();
@@ -47,6 +50,11 @@ export default function TeamsPage() {
   };
 
   const handleDelete = async (id, name) => {
+    if (!canDelete) {
+      alert('You do not have permission to delete teams');
+      return;
+    }
+
     if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
 
     try {
@@ -75,15 +83,19 @@ export default function TeamsPage() {
             <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
               Teams
             </h2>
-            <p className="text-slate-500 text-sm sm:text-base">Manage tournament teams</p>
+            <p className="text-slate-500 text-sm sm:text-base">
+              {canCreate ? 'Manage tournament teams' : 'View tournament teams'}
+            </p>
           </div>
-          <Link 
-            to="/teams/create" 
-            className="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 sm:px-6 sm:py-3 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all font-semibold touch-manipulation active:scale-95"
-          >
-            <Plus className="w-5 h-5" />
-            <span className="hidden sm:inline">Create</span>
-          </Link>
+          {canCreate && (
+            <Link 
+              to="/teams/create" 
+              className="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 sm:px-6 sm:py-3 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all font-semibold touch-manipulation active:scale-95"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="hidden sm:inline">Create</span>
+            </Link>
+          )}
         </div>
 
         {/* Search Bar */}
@@ -109,14 +121,18 @@ export default function TeamsPage() {
         <div className="text-center py-12">
           <Users className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-slate-600 mb-2">No teams yet</h3>
-          <p className="text-slate-500 mb-4 text-sm px-4">Create your first team to get started</p>
-          <Link 
-            to="/teams/create" 
-            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors touch-manipulation active:scale-95"
-          >
-            <Plus className="w-5 h-5" />
-            Create Team
-          </Link>
+          <p className="text-slate-500 mb-4 text-sm px-4">
+            {canCreate ? 'Create your first team to get started' : 'No teams available'}
+          </p>
+          {canCreate && (
+            <Link 
+              to="/teams/create" 
+              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors touch-manipulation active:scale-95"
+            >
+              <Plus className="w-5 h-5" />
+              Create Team
+            </Link>
+          )}
         </div>
       ) : filteredTeams.length === 0 ? (
         <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl">
@@ -164,22 +180,28 @@ export default function TeamsPage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Link 
-                      to={`/teams/${team.teamId}/edit`}
-                      className="flex-1 flex items-center justify-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2.5 rounded-xl hover:bg-indigo-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Edit
-                    </Link>
-                    <button 
-                      onClick={() => handleDelete(team.teamId, team.teamName)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-2.5 rounded-xl hover:bg-red-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Delete
-                    </button>
-                  </div>
+                  {(canEdit || canDelete) && (
+                    <div className="flex gap-2">
+                      {canEdit && (
+                        <Link 
+                          to={`/teams/${team.teamId}/edit`}
+                          className="flex-1 flex items-center justify-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2.5 rounded-xl hover:bg-indigo-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
+                        >
+                          <Edit className="w-4 h-4" />
+                          Edit
+                        </Link>
+                      )}
+                      {canDelete && (
+                        <button 
+                          onClick={() => handleDelete(team.teamId, team.teamName)}
+                          className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-2.5 rounded-xl hover:bg-red-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -196,7 +218,9 @@ export default function TeamsPage() {
                     <th className="px-6 py-4 text-center text-sm font-bold">Wins</th>
                     <th className="px-6 py-4 text-center text-sm font-bold">Losses</th>
                     <th className="px-6 py-4 text-center text-sm font-bold">Win Rate</th>
-                    <th className="px-6 py-4 text-center text-sm font-bold">Actions</th>
+                    {(canEdit || canDelete) && (
+                      <th className="px-6 py-4 text-center text-sm font-bold">Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -242,24 +266,30 @@ export default function TeamsPage() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <Link 
-                              to={`/teams/${team.teamId}/edit`}
-                              className="text-slate-600 hover:text-indigo-600 transition-colors p-2 hover:bg-indigo-50 rounded-lg"
-                              title="Edit team"
-                            >
-                              <Edit className="w-5 h-5" />
-                            </Link>
-                            <button 
-                              onClick={() => handleDelete(team.teamId, team.teamName)}
-                              className="text-slate-600 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                              title="Delete team"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </td>
+                        {(canEdit || canDelete) && (
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-center gap-2">
+                              {canEdit && (
+                                <Link 
+                                  to={`/teams/${team.teamId}/edit`}
+                                  className="text-slate-600 hover:text-indigo-600 transition-colors p-2 hover:bg-indigo-50 rounded-lg"
+                                  title="Edit team"
+                                >
+                                  <Edit className="w-5 h-5" />
+                                </Link>
+                              )}
+                              {canDelete && (
+                                <button 
+                                  onClick={() => handleDelete(team.teamId, team.teamName)}
+                                  className="text-slate-600 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                                  title="Delete team"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}

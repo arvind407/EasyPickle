@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Calendar, Loader2, ArrowLeft } from 'lucide-react';
+import { Calendar, Loader2, ArrowLeft, Trophy } from 'lucide-react';
 import { matchesAPI } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -12,12 +12,18 @@ export default function ScoreMatchPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [gameWinner, setGameWinner] = useState(null);
 
   useEffect(() => {
     if (id) {
       fetchMatch();
     }
   }, [id]);
+
+  // Check for winner when score changes
+  useEffect(() => {
+    checkForWinner();
+  }, [score]);
 
   const fetchMatch = async () => {
     try {
@@ -32,8 +38,37 @@ export default function ScoreMatchPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const checkForWinner = () => {
+    // Pickleball is typically played to 11 points, win by 2
+    const winningScore = 11;
+    const { team1Score, team2Score } = score;
+
+    if (team1Score >= winningScore && team1Score - team2Score >= 2) {
+      setGameWinner('team1');
+    } else if (team2Score >= winningScore && team2Score - team1Score >= 2) {
+      setGameWinner('team2');
+    } else {
+      setGameWinner(null);
+    }
+  };
+
+  const incrementScore = (team) => {
+    setScore(prev => ({
+      ...prev,
+      [team]: prev[team] + 1
+    }));
+  };
+
+  const decrementScore = (team) => {
+    setScore(prev => ({
+      ...prev,
+      [team]: Math.max(0, prev[team] - 1)
+    }));
+  };
+
+  const handleFinishGame = async () => {
+    if (!confirm('Are you sure you want to finish this game?')) return;
+    
     setError('');
     setSubmitting(true);
 
@@ -41,7 +76,7 @@ export default function ScoreMatchPage() {
       await matchesAPI.score(id, score);
       navigate('/matches');
     } catch (err) {
-      setError(err.message || 'Failed to score match');
+      setError(err.message || 'Failed to save match score');
     } finally {
       setSubmitting(false);
     }
@@ -77,7 +112,7 @@ export default function ScoreMatchPage() {
       <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
         Score Match
       </h2>
-      <p className="text-slate-500 mb-6 text-sm sm:text-base">Enter the match results</p>
+      <p className="text-slate-500 mb-6 text-sm sm:text-base">Track points live during the match</p>
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm">
@@ -101,60 +136,114 @@ export default function ScoreMatchPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-10">
-            <div className="text-center">
-              <label className="block text-sm font-bold text-slate-700 mb-3 sm:mb-4">
-                {match.team1Name} Score
-              </label>
-              <input 
-                type="number" 
-                min="0" 
-                value={score.team1Score} 
-                onChange={(e) => setScore({...score, team1Score: parseInt(e.target.value) || 0})} 
-                className="w-full text-center text-4xl sm:text-5xl font-bold px-4 sm:px-6 py-6 sm:py-8 border-4 border-indigo-200 rounded-2xl focus:ring-4 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gradient-to-br from-white to-indigo-50" 
-                required 
-              />
-            </div>
-            <div className="text-center">
-              <label className="block text-sm font-bold text-slate-700 mb-3 sm:mb-4">
-                {match.team2Name} Score
-              </label>
-              <input 
-                type="number" 
-                min="0" 
-                value={score.team2Score} 
-                onChange={(e) => setScore({...score, team2Score: parseInt(e.target.value) || 0})} 
-                className="w-full text-center text-4xl sm:text-5xl font-bold px-4 sm:px-6 py-6 sm:py-8 border-4 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-500 focus:border-purple-500 transition-all bg-gradient-to-br from-white to-purple-50" 
-                required 
-              />
+        {/* Winner Banner */}
+        {gameWinner && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-2xl text-center animate-pulse">
+            <p className="text-xl sm:text-2xl font-bold">
+              🏆 {gameWinner === 'team1' ? match.team1Name : match.team2Name} Wins!
+            </p>
+            <p className="text-sm mt-1 opacity-90">Click "Finish Game" to save the results</p>
+          </div>
+        )}
+
+        {/* Live Score Display */}
+        <div className="grid grid-cols-2 gap-4 sm:gap-8 mb-8">
+          {/* Team 1 Score */}
+          <div className="text-center">
+            <label className="block text-sm font-bold text-slate-700 mb-3 sm:mb-4">
+              {match.team1Name}
+            </label>
+            <div className="relative">
+              <div className={`text-6xl sm:text-8xl font-bold mb-4 transition-all ${
+                gameWinner === 'team1' ? 'text-emerald-500 scale-110' : 'text-indigo-600'
+              }`}>
+                {score.team1Score}
+              </div>
+              <div className="flex gap-2 justify-center">
+                <button
+                  type="button"
+                  onClick={() => decrementScore('team1Score')}
+                  disabled={score.team1Score === 0}
+                  className="w-12 h-12 sm:w-16 sm:h-16 bg-red-500 text-white rounded-xl font-bold text-2xl hover:bg-red-600 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all touch-manipulation shadow-lg"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  onClick={() => incrementScore('team1Score')}
+                  className="w-12 h-12 sm:w-16 sm:h-16 bg-emerald-500 text-white rounded-xl font-bold text-2xl hover:bg-emerald-600 active:scale-95 transition-all touch-manipulation shadow-lg"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-200">
-            <button 
-              type="submit" 
-              disabled={submitting}
-              className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:shadow-xl transition-all font-bold text-base sm:text-lg disabled:opacity-50 flex items-center justify-center gap-2 touch-manipulation active:scale-95"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                'Submit Score'
-              )}
-            </button>
-            <button 
-              type="button" 
-              onClick={() => navigate('/matches')} 
-              className="flex-1 bg-slate-200 text-slate-700 px-6 py-4 rounded-xl hover:bg-slate-300 transition-all font-bold text-base sm:text-lg touch-manipulation active:scale-95"
-            >
-              Cancel
-            </button>
+          {/* Team 2 Score */}
+          <div className="text-center">
+            <label className="block text-sm font-bold text-slate-700 mb-3 sm:mb-4">
+              {match.team2Name}
+            </label>
+            <div className="relative">
+              <div className={`text-6xl sm:text-8xl font-bold mb-4 transition-all ${
+                gameWinner === 'team2' ? 'text-emerald-500 scale-110' : 'text-purple-600'
+              }`}>
+                {score.team2Score}
+              </div>
+              <div className="flex gap-2 justify-center">
+                <button
+                  type="button"
+                  onClick={() => decrementScore('team2Score')}
+                  disabled={score.team2Score === 0}
+                  className="w-12 h-12 sm:w-16 sm:h-16 bg-red-500 text-white rounded-xl font-bold text-2xl hover:bg-red-600 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all touch-manipulation shadow-lg"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  onClick={() => incrementScore('team2Score')}
+                  className="w-12 h-12 sm:w-16 sm:h-16 bg-emerald-500 text-white rounded-xl font-bold text-2xl hover:bg-emerald-600 active:scale-95 transition-all touch-manipulation shadow-lg"
+                >
+                  +
+                </button>
+              </div>
+            </div>
           </div>
-        </form>
+        </div>
+
+        {/* Game Info */}
+        <div className="text-center text-sm text-slate-500 mb-6">
+          <p>Playing to 11 points • Win by 2</p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-200">
+          <button 
+            type="button"
+            onClick={handleFinishGame}
+            disabled={submitting || (score.team1Score === 0 && score.team2Score === 0)}
+            className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:shadow-xl transition-all font-bold text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation active:scale-95"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Trophy className="w-5 h-5" />
+                Finish Game
+              </>
+            )}
+          </button>
+          <button 
+            type="button" 
+            onClick={() => navigate('/matches')} 
+            className="flex-1 bg-slate-200 text-slate-700 px-6 py-4 rounded-xl hover:bg-slate-300 transition-all font-bold text-base sm:text-lg touch-manipulation active:scale-95"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );

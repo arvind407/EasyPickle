@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 import MainLayout from './layouts/MainLayout';
 import LoginPage from './pages/LoginPage';
 import TournamentsPage from './pages/TournamentsPage';
@@ -27,7 +28,9 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       
+      {/* Home - Tournaments (accessible to all authenticated users) */}
       <Route path="/" element={
         <ProtectedRoute>
           <MainLayout>
@@ -36,14 +39,29 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Create Tournament - Admin only */}
       <Route path="/tournaments/create" element={
         <ProtectedRoute>
-          <MainLayout>
-            <CreateTournamentPage />
-          </MainLayout>
+          <AdminRoute>
+            <MainLayout>
+              <CreateTournamentPage />
+            </MainLayout>
+          </AdminRoute>
         </ProtectedRoute>
       } />
       
+      {/* Edit Tournament - Admin only */}
+      <Route path="/tournaments/:id/edit" element={
+        <ProtectedRoute>
+          <AdminRoute>
+            <MainLayout>
+              <EditTournamentPage />
+            </MainLayout>
+          </AdminRoute>
+        </ProtectedRoute>
+      } />
+      
+      {/* Teams (accessible to all authenticated users) */}
       <Route path="/teams" element={
         <ProtectedRoute>
           <MainLayout>
@@ -52,14 +70,29 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Create Team - Admin only */}
       <Route path="/teams/create" element={
         <ProtectedRoute>
-          <MainLayout>
-            <CreateTeamPage />
-          </MainLayout>
+          <AdminRoute>
+            <MainLayout>
+              <CreateTeamPage />
+            </MainLayout>
+          </AdminRoute>
         </ProtectedRoute>
       } />
       
+      {/* Edit Team - Admin only */}
+      <Route path="/teams/:id/edit" element={
+        <ProtectedRoute>
+          <AdminRoute>
+            <MainLayout>
+              <EditTeamPage />
+            </MainLayout>
+          </AdminRoute>
+        </ProtectedRoute>
+      } />
+      
+      {/* Players (accessible to all authenticated users) */}
       <Route path="/players" element={
         <ProtectedRoute>
           <MainLayout>
@@ -68,6 +101,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Matches (accessible to all authenticated users) */}
       <Route path="/matches" element={
         <ProtectedRoute>
           <MainLayout>
@@ -76,22 +110,29 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Schedule Match - Admin only */}
       <Route path="/matches/schedule" element={
         <ProtectedRoute>
-          <MainLayout>
-            <ScheduleMatchPage />
-          </MainLayout>
+          <AdminRoute>
+            <MainLayout>
+              <ScheduleMatchPage />
+            </MainLayout>
+          </AdminRoute>
         </ProtectedRoute>
       } />
       
+      {/* Score Match - Admin only */}
       <Route path="/matches/:id/score" element={
         <ProtectedRoute>
-          <MainLayout>
-            <ScoreMatchPage />
-          </MainLayout>
+          <AdminRoute>
+            <MainLayout>
+              <ScoreMatchPage />
+            </MainLayout>
+          </AdminRoute>
         </ProtectedRoute>
       } />
       
+      {/* Standings (accessible to all authenticated users) */}
       <Route path="/standings" element={
         <ProtectedRoute>
           <MainLayout>
@@ -99,24 +140,6 @@ function AppRoutes() {
           </MainLayout>
         </ProtectedRoute>
       } />
-
-      <Route path="/tournaments/:id/edit" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <EditTournamentPage />
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-
-      <Route path="/teams/:id/edit" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <EditTeamPage />
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-
-      <Route path="/register" element={<RegisterPage />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Plus } from 'lucide-react';
 import { matchesAPI } from '../services/api';
+import { useRole } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function MatchesPage() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const { canCreate, canEdit } = useRole();
 
   useEffect(() => {
     fetchMatches();
@@ -43,15 +46,19 @@ export default function MatchesPage() {
           <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
             Matches
           </h2>
-          <p className="text-slate-500 text-sm sm:text-base">Schedule and score matches</p>
+          <p className="text-slate-500 text-sm sm:text-base">
+            {canCreate ? 'Schedule and score matches' : 'View match schedule and results'}
+          </p>
         </div>
-        <Link 
-          to="/matches/schedule" 
-          className="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 sm:px-6 sm:py-3 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all font-semibold touch-manipulation active:scale-95"
-        >
-          <Plus className="w-5 h-5" />
-          <span className="hidden sm:inline">Schedule</span>
-        </Link>
+        {canCreate && (
+          <Link 
+            to="/matches/schedule" 
+            className="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 sm:px-6 sm:py-3 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all font-semibold touch-manipulation active:scale-95"
+          >
+            <Plus className="w-5 h-5" />
+            <span className="hidden sm:inline">Schedule</span>
+          </Link>
+        )}
       </div>
 
       {error && (
@@ -64,14 +71,18 @@ export default function MatchesPage() {
         <div className="text-center py-12">
           <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-slate-600 mb-2">No matches scheduled</h3>
-          <p className="text-slate-500 mb-4 text-sm px-4">Schedule your first match to get started</p>
-          <Link 
-            to="/matches/schedule" 
-            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors touch-manipulation active:scale-95"
-          >
-            <Plus className="w-5 h-5" />
-            Schedule Match
-          </Link>
+          <p className="text-slate-500 mb-4 text-sm px-4">
+            {canCreate ? 'Schedule your first match to get started' : 'No matches available yet'}
+          </p>
+          {canCreate && (
+            <Link 
+              to="/matches/schedule" 
+              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors touch-manipulation active:scale-95"
+            >
+              <Plus className="w-5 h-5" />
+              Schedule Match
+            </Link>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -123,7 +134,7 @@ export default function MatchesPage() {
                 </div>
               </div>
 
-              {match.status === 'Scheduled' && (
+              {match.status === 'Scheduled' && canEdit && (
                 <Link 
                   to={`/matches/${match.matchId}/score`} 
                   className="mt-4 w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all font-semibold text-center block touch-manipulation active:scale-95"
