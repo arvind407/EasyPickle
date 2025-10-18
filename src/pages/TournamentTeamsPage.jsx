@@ -147,64 +147,54 @@ export default function TournamentTeamsPage() {
       ) : (
         <>
           {/* Mobile Card View */}
-          <div className="space-y-4 sm:hidden">
-            {filteredTeams.map(team => {
-              const totalGames = (team.wins || 0) + (team.losses || 0);
-              
-              return (
-                <div 
-                  key={team.teamId} 
-                  className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-white/20 active:shadow-xl transition-all"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Users className="w-6 h-6 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-slate-800 truncate text-lg">{team.teamName}</h3>
-                        <p className="text-sm text-slate-600">{team.playerIds?.length || 0} players</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="text-center p-3 bg-emerald-50 rounded-xl">
-                      <p className="text-2xl font-bold text-emerald-600">{team.wins || 0}</p>
-                      <p className="text-xs text-slate-600 font-medium">Wins</p>
-                    </div>
-                    <div className="text-center p-3 bg-red-50 rounded-xl">
-                      <p className="text-2xl font-bold text-red-600">{team.losses || 0}</p>
-                      <p className="text-xs text-slate-600 font-medium">Losses</p>
-                    </div>
-                  </div>
-
-                  {(canEdit || canDelete) && (
-                    <div className="flex gap-2">
-                      {canEdit && (
-                        <Link 
-                          to={`/teams/${team.teamId}/edit`}
-                          className="flex-1 flex items-center justify-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2.5 rounded-xl hover:bg-indigo-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
-                        >
-                          <Edit className="w-4 h-4" />
-                          Edit
-                        </Link>
+            <div className="sm:hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-200">
+                    <th className="text-left py-2 px-2 text-sm font-semibold text-slate-600">Team</th>
+                    <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">W</th>
+                    <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">L</th>
+                    {(canEdit || canDelete) && (
+                      <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">Actions</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTeams.map(team => (
+                    <tr key={team.teamId} className="border-b border-slate-100">
+                      <td className="py-3 px-2">
+                        <p className="font-semibold text-slate-800">{team.teamName}</p>
+                        <p className="text-xs text-slate-500">{team.playerIds.join(', ')}</p>
+                      </td>
+                      <td className="py-3 px-2 text-center font-semibold text-emerald-600">{team.wins || 0}</td>
+                      <td className="py-3 px-2 text-center font-semibold text-red-600">{team.losses || 0}</td>
+                      {(canEdit || canDelete) && (
+                        <td className="py-3 px-2">
+                          <div className="flex gap-1 justify-center">
+                            {canEdit && (
+                              <Link 
+                                to={`/teams/${team.teamId}/edit`}
+                                className="p-2 text-indigo-600 hover:bg-indigo-50 rounded"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Link>
+                            )}
+                            {canDelete && (
+                              <button 
+                                onClick={() => handleDelete(team.teamId, team.teamName)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       )}
-                      {canDelete && (
-                        <button 
-                          onClick={() => handleDelete(team.teamId, team.teamName)}
-                          className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-2.5 rounded-xl hover:bg-red-100 transition-all font-semibold text-sm touch-manipulation active:scale-95"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
           {/* Desktop Table View */}
           <div className="hidden sm:block bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/20">
@@ -224,7 +214,7 @@ export default function TournamentTeamsPage() {
                 <tbody className="divide-y divide-slate-100">
                   {filteredTeams.map(team => {
                     const totalGames = (team.wins || 0) + (team.losses || 0);
-                    
+          
                     return (
                       <tr key={team.teamId} className="hover:bg-indigo-50/50 transition-colors">
                         <td className="px-6 py-4">

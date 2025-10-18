@@ -137,34 +137,32 @@ export default function TournamentStandingsPage() {
                 
                 <div className="p-4">
                   {/* Mobile View */}
-                  <div className="space-y-3 sm:hidden">
-                    {groupStandings.map(team => (
-                      <div key={team.teamId} className="bg-slate-50 rounded-xl p-4">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center font-bold text-white">
-                            {team.groupRank}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-slate-800">{team.teamName}</h4>
-                            <p className="text-sm text-slate-600">{team.played} games</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-indigo-600">{team.points}</p>
-                            <p className="text-xs text-slate-500">pts</p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="text-center p-2 bg-emerald-50 rounded-lg">
-                            <p className="text-lg font-bold text-emerald-600">{team.wins}</p>
-                            <p className="text-xs text-slate-600">Wins</p>
-                          </div>
-                          <div className="text-center p-2 bg-red-50 rounded-lg">
-                            <p className="text-lg font-bold text-red-600">{team.losses}</p>
-                            <p className="text-xs text-slate-600">Losses</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="sm:hidden">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-slate-200">
+                          <th className="text-left py-2 px-2 text-sm font-semibold text-slate-600">#</th>
+                          <th className="text-left py-2 px-2 text-sm font-semibold text-slate-600">Team</th>
+                          <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">W</th>
+                          <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">L</th>
+                          <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">P</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {groupStandings.map(team => (
+                          <tr key={team.teamId} className="border-b border-slate-100">
+                            <td className="py-3 px-2 text-sm font-bold text-slate-700">{team.groupRank}</td>
+                            <td className="py-3 px-2">
+                              <p className="font-semibold text-slate-800">{team.teamName}</p>
+                              <p className="text-xs text-slate-500">{team.played} games</p>
+                            </td>
+                            <td className="py-3 px-2 text-center font-semibold text-emerald-600">{team.wins}</td>
+                            <td className="py-3 px-2 text-center font-semibold text-red-600">{team.losses}</td>
+                            <td className="py-3 px-2 text-center font-bold text-indigo-600">{team.points}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
 
                   {/* Desktop View */}
@@ -213,34 +211,32 @@ export default function TournamentStandingsPage() {
               
               <div className="p-4">
                 {/* Mobile View */}
-                <div className="space-y-3 sm:hidden">
-                  {ungroupedStandings.map(team => (
-                    <div key={team.teamId} className="bg-slate-50 rounded-xl p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center font-bold text-white">
-                          {team.groupRank}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-bold text-slate-800">{team.teamName}</h4>
-                          <p className="text-sm text-slate-600">{team.played} games</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-indigo-600">{team.points}</p>
-                          <p className="text-xs text-slate-500">pts</p>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="text-center p-2 bg-emerald-50 rounded-lg">
-                          <p className="text-lg font-bold text-emerald-600">{team.wins}</p>
-                          <p className="text-xs text-slate-600">Wins</p>
-                        </div>
-                        <div className="text-center p-2 bg-red-50 rounded-lg">
-                          <p className="text-lg font-bold text-red-600">{team.losses}</p>
-                          <p className="text-xs text-slate-600">Losses</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="sm:hidden">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-2 px-2 text-sm font-semibold text-slate-600">#</th>
+                        <th className="text-left py-2 px-2 text-sm font-semibold text-slate-600">Team</th>
+                        <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">W</th>
+                        <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">L</th>
+                        <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">P</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ungroupedStandings.map(team => (
+                        <tr key={team.teamId} className="border-b border-slate-100">
+                          <td className="py-3 px-2 text-sm font-bold text-slate-700">{team.groupRank}</td>
+                          <td className="py-3 px-2">
+                            <p className="font-semibold text-slate-800">{team.teamName}</p>
+                            <p className="text-xs text-slate-500">{team.played} games</p>
+                          </td>
+                          <td className="py-3 px-2 text-center font-semibold text-emerald-600">{team.wins}</td>
+                          <td className="py-3 px-2 text-center font-semibold text-red-600">{team.losses}</td>
+                          <td className="py-3 px-2 text-center font-bold text-indigo-600">{team.points}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
 
                 {/* Desktop View */}
