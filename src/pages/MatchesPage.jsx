@@ -130,6 +130,26 @@ export default function MatchesPage() {
                   {match.status === 'In Progress' && '🔴 '}
                   {match.status}
                 </span>
+
+                {/* Add Match Type Badge */}
+                {match.matchType && (
+                  <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
+                    match.matchType === 'Final' 
+                    ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white' 
+                    : match.matchType === 'SemiFinal'
+                    ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-white'
+                    : match.matchType === 'QuarterFinal'
+                    ? 'bg-gradient-to-r from-purple-400 to-purple-500 text-white'
+                    : match.matchType === 'Practice'
+                    ? 'bg-gradient-to-r from-slate-400 to-slate-500 text-white'
+                    : 'bg-gradient-to-r from-indigo-400 to-indigo-500 text-white'
+                    }`}>
+                    {match.matchType === 'QuarterFinal' ? 'Quarter Final' :
+                    match.matchType === 'SemiFinal' ? 'Semi Final' :
+                    match.matchType}
+                  </span>
+                )}
+
                 <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
                   <Calendar className="w-4 h-4" />
                   <span>{match.matchDate} • {match.matchTime}</span>

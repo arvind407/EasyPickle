@@ -201,8 +201,29 @@ export default function ScoreMatchPage() {
             <Calendar className="w-4 h-4" />
             <span>{match.matchDate} • {match.matchTime}</span>
             {match.court && <span className="hidden sm:inline">• {match.court}</span>}
+            {/* Add Match Type */}
+            {match.matchType && (
+              <span className="hidden sm:inline">
+        •       <span className="font-bold text-indigo-600">
+                  {match.matchType === 'QuarterFinal' ? 'Quarter Final' :
+                  match.matchType === 'SemiFinal' ? 'Semi Final' :
+                  match.matchType}
+                </span>
+              </span>
+            )}
           </div>
           {match.court && <div className="text-center text-sm text-slate-600 mb-3 sm:hidden">{match.court}</div>}
+
+          {/* Show match type on mobile */}
+          {match.matchType && (
+            <div className="text-center text-sm mb-3 sm:hidden">
+              <span className="font-bold text-indigo-600">
+                {match.matchType === 'QuarterFinal' ? 'Quarter Final' :
+                match.matchType === 'SemiFinal' ? 'Semi Final' :
+                match.matchType}
+              </span>
+            </div>
+          )}
           
           {/* Live Badge */}
           {match.status === 'In Progress' && (

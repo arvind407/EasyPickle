@@ -24,6 +24,7 @@ import EditTeamPage from './pages/EditTeamPage';
 import PlayersPage from './pages/PlayersPage';
 import ScheduleMatchPage from './pages/ScheduleMatchPage';
 import ScoreMatchPage from './pages/ScoreMatchPage';
+import TournamentGroupsPage from './pages/TournamentGroupsPage';
 
 function AppRoutes() {
   return (
@@ -141,6 +142,14 @@ function AppRoutes() {
           <MainLayout>
             <ScoreMatchPage />
           </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/tournament/:id/groups" element={
+        <ProtectedRoute>
+          <TournamentLayout>
+            <TournamentGroupsPage />
+          </TournamentLayout>
         </ProtectedRoute>
       } />
 

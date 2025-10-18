@@ -1,27 +1,34 @@
-// src/pages/TournamentStandingsPage.jsx
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Trophy, Medal } from 'lucide-react';
-import { standingsAPI } from '../services/api';
+import { Trophy, Medal, FolderOpen } from 'lucide-react';
+import { standingsAPI, groupsAPI } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-export default function TournamentStandingsPage() {
+export default function TournamentGroupStandingsPage() {
   const { id } = useParams(); // Tournament ID
   const [standings, setStandings] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (id) {
-      fetchStandings();
+      fetchData();
     }
   }, [id]);
 
-  const fetchStandings = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await standingsAPI.getByTournament(id);
-      setStandings(response.data || []);
+      
+      // Fetch standings
+      const standingsResponse = await standingsAPI.getByTournament(id);
+      setStandings(standingsResponse.data || []);
+      
+      // Fetch groups
+      const groupsResponse = await groupsAPI.getAll(id);
+      setGroups(groupsResponse.data || []);
+      
       setError('');
     } catch (err) {
       setError(err.message || 'Failed to load standings');
@@ -31,17 +38,11 @@ export default function TournamentStandingsPage() {
     }
   };
 
-  const getRankColor = (rank) => {
-    if (rank === 1) return 'from-yellow-400 to-yellow-500';
-    if (rank === 2) return 'from-slate-300 to-slate-400';
-    if (rank === 3) return 'from-orange-400 to-orange-500';
-    return 'from-slate-100 to-slate-200';
+  const getStandingsByGroup = (groupName) => {
+    return standings.filter(team => team.groupName === groupName);
   };
 
-  const getRankIcon = (rank) => {
-    if (rank <= 3) return <Medal className="w-5 h-5 text-white" />;
-    return null;
-  };
+  const ungroupedStandings = standings.filter(team => !team.groupName);
 
   if (loading) {
     return (
@@ -57,9 +58,9 @@ export default function TournamentStandingsPage() {
     <div>
       <div className="mb-6">
         <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
-          Standings
+          Group Standings
         </h2>
-        <p className="text-slate-500 text-sm sm:text-base">Tournament leaderboard</p>
+        <p className="text-slate-500 text-sm sm:text-base">View standings organized by groups</p>
       </div>
 
       {error && (
@@ -71,77 +72,163 @@ export default function TournamentStandingsPage() {
       {standings.length === 0 ? (
         <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl">
           <Trophy className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <p className="text-slate-500 text-sm px-4">No standings available yet. Teams need to play matches first.</p>
+          <p className="text-slate-500 text-sm px-4">No standings available yet.</p>
         </div>
       ) : (
-        <>
-          {/* Mobile Card View */}
-          <div className="space-y-4 sm:hidden">
-            {standings.map(team => (
-              <div 
-                key={team.teamId} 
-                className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-white/20"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center font-bold text-xl shadow-lg bg-gradient-to-br ${getRankColor(team.rank)}`}>
-                    {<span className="text-slate-600">{team.rank}</span>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-slate-800 text-lg truncate">{team.teamName}</h3>
-                    <p className="text-sm text-slate-600">{team.played} games played</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-indigo-600">{team.points}</p>
-                    <p className="text-xs text-slate-500">points</p>
+        <div className="space-y-6">
+          {/* Group Standings */}
+          {groups.map(group => {
+            const groupStandings = getStandingsByGroup(group.groupName);
+            
+            if (groupStandings.length === 0) return null;
+            
+            return (
+              <div key={group.groupId} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <FolderOpen className="w-6 h-6 text-white" />
+                    <h3 className="text-xl font-bold text-white">{group.groupName}</h3>
                   </div>
                 </div>
+                
+                <div className="p-4">
+                  {/* Mobile View */}
+                  <div className="space-y-3 sm:hidden">
+                    {groupStandings.map(team => (
+                      <div key={team.teamId} className="bg-slate-50 rounded-xl p-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center font-bold text-white">
+                            {team.rank}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-slate-800">{team.teamName}</h4>
+                            <p className="text-sm text-slate-600">{team.played} games</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-indigo-600">{team.points}</p>
+                            <p className="text-xs text-slate-500">pts</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="text-center p-2 bg-emerald-50 rounded-lg">
+                            <p className="text-lg font-bold text-emerald-600">{team.wins}</p>
+                            <p className="text-xs text-slate-600">Wins</p>
+                          </div>
+                          <div className="text-center p-2 bg-red-50 rounded-lg">
+                            <p className="text-lg font-bold text-red-600">{team.losses}</p>
+                            <p className="text-xs text-slate-600">Losses</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center p-3 bg-emerald-50 rounded-xl">
-                    <p className="text-xl font-bold text-emerald-600">{team.wins}</p>
-                    <p className="text-xs text-slate-600 font-medium">Wins</p>
-                  </div>
-                  <div className="text-center p-3 bg-red-50 rounded-xl">
-                    <p className="text-xl font-bold text-red-600">{team.losses}</p>
-                    <p className="text-xs text-slate-600 font-medium">Losses</p>
-                  </div>
+                  {/* Desktop View */}
+                  <table className="w-full hidden sm:table">
+                    <thead className="border-b-2 border-slate-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-bold text-slate-700">Rank</th>
+                        <th className="px-4 py-3 text-left text-sm font-bold text-slate-700">Team</th>
+                        <th className="px-4 py-3 text-center text-sm font-bold text-slate-700">P</th>
+                        <th className="px-4 py-3 text-center text-sm font-bold text-slate-700">W</th>
+                        <th className="px-4 py-3 text-center text-sm font-bold text-slate-700">L</th>
+                        <th className="px-4 py-3 text-center text-sm font-bold text-slate-700">Pts</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {groupStandings.map(team => (
+                        <tr key={team.teamId} className="hover:bg-indigo-50/50 transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center font-bold text-white text-sm">
+                              {team.rank}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 font-bold text-slate-800">{team.teamName}</td>
+                          <td className="px-4 py-3 text-center text-slate-600 font-medium">{team.played}</td>
+                          <td className="px-4 py-3 text-center font-bold text-emerald-600">{team.wins}</td>
+                          <td className="px-4 py-3 text-center font-bold text-red-600">{team.losses}</td>
+                          <td className="px-4 py-3 text-center font-bold text-xl text-indigo-600">{team.points}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
 
-          {/* Desktop Table View */}
-          <div className="hidden sm:block bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/20">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-bold">Rank</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold">Team</th>
-                  <th className="px-6 py-4 text-center text-sm font-bold">Played</th>
-                  <th className="px-6 py-4 text-center text-sm font-bold">Wins</th>
-                  <th className="px-6 py-4 text-center text-sm font-bold">Losses</th>
-                  <th className="px-6 py-4 text-center text-sm font-bold">Points</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {standings.map(team => (
-                  <tr key={team.teamId} className="hover:bg-indigo-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg bg-gradient-to-br`}>
-                        {<span className="text-slate-600">{team.rank}</span>}
+          {/* Ungrouped Teams */}
+          {ungroupedStandings.length > 0 && (
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+              <div className="bg-gradient-to-r from-slate-600 to-slate-700 px-6 py-4">
+                <h3 className="text-xl font-bold text-white">Ungrouped Teams</h3>
+              </div>
+              
+              <div className="p-4">
+                {/* Mobile View */}
+                <div className="space-y-3 sm:hidden">
+                  {ungroupedStandings.map(team => (
+                    <div key={team.teamId} className="bg-slate-50 rounded-xl p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center font-bold text-white">
+                          {team.rank}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-slate-800">{team.teamName}</h4>
+                          <p className="text-sm text-slate-600">{team.played} games</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-indigo-600">{team.points}</p>
+                          <p className="text-xs text-slate-500">pts</p>
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 font-bold text-slate-800">{team.teamName}</td>
-                    <td className="px-6 py-4 text-center text-slate-600 font-medium">{team.played}</td>
-                    <td className="px-6 py-4 text-center font-bold text-emerald-600">{team.wins}</td>
-                    <td className="px-6 py-4 text-center font-bold text-red-600">{team.losses}</td>
-                    <td className="px-6 py-4 text-center font-bold text-xl text-indigo-600">{team.points}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="text-center p-2 bg-emerald-50 rounded-lg">
+                          <p className="text-lg font-bold text-emerald-600">{team.wins}</p>
+                          <p className="text-xs text-slate-600">Wins</p>
+                        </div>
+                        <div className="text-center p-2 bg-red-50 rounded-lg">
+                          <p className="text-lg font-bold text-red-600">{team.losses}</p>
+                          <p className="text-xs text-slate-600">Losses</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop View */}
+                <table className="w-full hidden sm:table">
+                  <thead className="border-b-2 border-slate-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-slate-700">Rank</th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-slate-700">Team</th>
+                      <th className="px-4 py-3 text-center text-sm font-bold text-slate-700">P</th>
+                      <th className="px-4 py-3 text-center text-sm font-bold text-slate-700">W</th>
+                      <th className="px-4 py-3 text-center text-sm font-bold text-slate-700">L</th>
+                      <th className="px-4 py-3 text-center text-sm font-bold text-slate-700">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {ungroupedStandings.map(team => (
+                      <tr key={team.teamId} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center font-bold text-white text-sm">
+                            {team.rank}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 font-bold text-slate-800">{team.teamName}</td>
+                        <td className="px-4 py-3 text-center text-slate-600 font-medium">{team.played}</td>
+                        <td className="px-4 py-3 text-center font-bold text-emerald-600">{team.wins}</td>
+                        <td className="px-4 py-3 text-center font-bold text-red-600">{team.losses}</td>
+                        <td className="px-4 py-3 text-center font-bold text-xl text-indigo-600">{team.points}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

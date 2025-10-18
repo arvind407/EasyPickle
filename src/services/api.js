@@ -177,3 +177,43 @@ export const standingsAPI = {
   getByTournament: (tournamentId) => 
     apiCall(`/standings?tournamentId=${tournamentId}`)
 };
+
+// Groups API
+export const groupsAPI = {
+  getAll: (tournamentId = null) => {
+    const url = tournamentId 
+      ? `/groups?tournamentId=${tournamentId}` 
+      : '/groups';
+    return apiCall(url);
+  },
+  
+  getById: (id) => apiCall(`/groups/${id}`),
+  
+  create: (groupData) => 
+    apiCall('/groups', {
+      method: 'POST',
+      body: JSON.stringify(groupData)
+    }),
+  
+  update: (id, groupData) => 
+    apiCall(`/groups/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(groupData)
+    }),
+  
+  delete: (id) => 
+    apiCall(`/groups/${id}`, { 
+      method: 'DELETE' 
+    }),
+  
+  addTeam: (groupId, teamId) => 
+    apiCall(`/groups/${groupId}/teams`, {
+      method: 'POST',
+      body: JSON.stringify({ teamId })
+    }),
+  
+  removeTeam: (groupId, teamId) => 
+    apiCall(`/groups/${groupId}/teams/${teamId}`, {
+      method: 'DELETE'
+    })
+};

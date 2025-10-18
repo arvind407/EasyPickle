@@ -5,6 +5,7 @@ import { Calendar, Plus, RefreshCw, Filter, X } from 'lucide-react';
 import { matchesAPI, teamsAPI } from '../services/api';
 import { useRole } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { formatDate } from '../utils/dateUtils';
 
 export default function TournamentMatchesPage() {
   const { id } = useParams(); // Tournament ID
@@ -304,9 +305,14 @@ export default function TournamentMatchesPage() {
                   {match.status === 'In Progress' && '🔴 '}
                   {match.status}
                 </span>
+
+                {/* Add Match Type Badge */}
+                <span className="text-slate-500 text-sm">{match.matchType && match.matchType === 'QuarterFinal' ? 'Quarter Final' :
+                    match.matchType === 'SemiFinal' ? 'Semi Final' :
+                    match.matchType}</span>
                 <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
                   <Calendar className="w-4 h-4" />
-                  <span>{match.matchDate} • {match.matchTime}</span>
+                  <span>{formatDate(match.matchDate)}</span>
                 </div>
                 {match.court && (
                   <span className="text-slate-500 text-sm">📍 {match.court}</span>

@@ -1,7 +1,7 @@
 // src/layouts/TournamentLayout.jsx
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Calendar, Users, BarChart3, Home, LogOut, ArrowLeft } from 'lucide-react';
+import { Menu, X, Calendar, Users, BarChart3, Home, LogOut, ArrowLeft, FolderOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTournament } from '../context/TournamentContext';
 
@@ -80,6 +80,12 @@ export default function TournamentLayout({ children }) {
                   active={isActive(`/tournament/${selectedTournament?.tournamentId}/teams`)} 
                 />
                 <NavLink 
+                  to={`/tournament/${selectedTournament?.tournamentId}/groups`} 
+                  icon={FolderOpen} 
+                  label="Groups" 
+                  active={isActive(`/tournament/${selectedTournament?.tournamentId}/groups`)} 
+                />
+                <NavLink 
                   to={`/tournament/${selectedTournament?.tournamentId}/standings`} 
                   icon={BarChart3} 
                   label="Standings" 
@@ -122,6 +128,13 @@ export default function TournamentLayout({ children }) {
                 icon={Users} 
                 label="Teams" 
                 active={isActive(`/tournament/${selectedTournament?.tournamentId}/teams`)} 
+                onClick={closeMenu} 
+              />
+              <MobileNavLink 
+                to={`/tournament/${selectedTournament?.tournamentId}/groups`} 
+                icon={FolderOpen} 
+                label="Groups" 
+                active={isActive(`/tournament/${selectedTournament?.tournamentId}/groups`)} 
                 onClick={closeMenu} 
               />
               <MobileNavLink 
@@ -183,6 +196,12 @@ export default function TournamentLayout({ children }) {
             icon={Users} 
             label="Teams" 
             active={isActive(`/tournament/${selectedTournament?.tournamentId}/teams`)} 
+          />
+          <BottomNavLink 
+            to={`/tournament/${selectedTournament?.tournamentId}/groups`} 
+            icon={FolderOpen} 
+            label="Groups" 
+            active={isActive(`/tournament/${selectedTournament?.tournamentId}/groups`)} 
           />
           <BottomNavLink 
             to={`/tournament/${selectedTournament?.tournamentId}/standings`} 

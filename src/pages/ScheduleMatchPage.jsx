@@ -182,6 +182,24 @@ export default function ScheduleMatchPage() {
               placeholder="e.g., Court 1"
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2">
+              Match Type *
+            </label>
+            <select 
+              value={formData.matchType} 
+              onChange={(e) => setFormData({...formData, matchType: e.target.value})} 
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base"
+              required
+            >
+              <option value="Practice">Practice</option>
+              <option value="League">League</option>
+              <option value="QuarterFinal">Quarter Final</option>
+              <option value="SemiFinal">Semi Final</option>
+              <option value="Final">Final</option>
+            </select>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
