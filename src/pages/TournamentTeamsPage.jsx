@@ -93,7 +93,7 @@ export default function TournamentTeamsPage() {
           </div>
           {canCreate && (
             <Link 
-              to="/teams/create" 
+              to={`/tournament/${id}/teams/create`}
               className="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 sm:px-6 sm:py-3 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all font-semibold touch-manipulation active:scale-95"
             >
               <Plus className="w-5 h-5" />
@@ -130,7 +130,7 @@ export default function TournamentTeamsPage() {
           </p>
           {canCreate && (
             <Link 
-              to="/teams/create" 
+              to={`/tournament/${id}/teams/create`}
               className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors touch-manipulation active:scale-95"
             >
               <Plus className="w-5 h-5" />

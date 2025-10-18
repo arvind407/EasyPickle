@@ -106,6 +106,16 @@ function AppRoutes() {
           </AdminRoute>
         </ProtectedRoute>
       } />
+
+      <Route path="/tournament/:id/teams/create" element={
+        <ProtectedRoute>
+          <AdminRoute>
+            <TournamentLayout>
+              <CreateTeamPage />
+            </TournamentLayout>
+          </AdminRoute>
+        </ProtectedRoute>
+      } />
       
       <Route path="/teams/:id/edit" element={
         <ProtectedRoute>

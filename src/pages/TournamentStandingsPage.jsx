@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Trophy, Medal, FolderOpen } from 'lucide-react';
-import { standingsAPI, groupsAPI } from '../services/api';
+import { standingsAPI, groupsAPI, teamsAPI } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function TournamentGroupStandingsPage() {
   const { id } = useParams(); // Tournament ID
   const [standings, setStandings] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -23,12 +24,31 @@ export default function TournamentGroupStandingsPage() {
       
       // Fetch standings
       const standingsResponse = await standingsAPI.getByTournament(id);
-      setStandings(standingsResponse.data || []);
+      const standingsData = standingsResponse.data || [];
       
       // Fetch groups
       const groupsResponse = await groupsAPI.getAll(id);
-      setGroups(groupsResponse.data || []);
+      const groupsData = groupsResponse.data || [];
+      setGroups(groupsData);
       
+      // Fetch teams to get group information
+      const teamsResponse = await teamsAPI.getAll(id);
+      const teamsData = teamsResponse.data || [];
+      setTeams(teamsData);
+      
+      // Merge standings with group information from teams
+      const enrichedStandings = standingsData.map(standing => {
+        const team = teamsData.find(t => t.teamId === standing.teamId);
+        const group = team?.groupId ? groupsData.find(g => g.groupId === team.groupId) : null;
+        
+        return {
+          ...standing,
+          groupId: team?.groupId || null,
+          groupName: group?.groupName || null
+        };
+      });
+      
+      setStandings(enrichedStandings);
       setError('');
     } catch (err) {
       setError(err.message || 'Failed to load standings');
@@ -38,11 +58,11 @@ export default function TournamentGroupStandingsPage() {
     }
   };
 
-  const getStandingsByGroup = (groupName) => {
-    return standings.filter(team => team.groupName === groupName);
+  const getStandingsByGroup = (groupId) => {
+    return standings.filter(team => team.groupId === groupId);
   };
 
-  const ungroupedStandings = standings.filter(team => !team.groupName);
+  const ungroupedStandings = standings.filter(team => !team.groupId);
 
   if (loading) {
     return (
@@ -78,7 +98,7 @@ export default function TournamentGroupStandingsPage() {
         <div className="space-y-6">
           {/* Group Standings */}
           {groups.map(group => {
-            const groupStandings = getStandingsByGroup(group.groupName);
+            const groupStandings = getStandingsByGroup(group.groupId);
             
             if (groupStandings.length === 0) return null;
             
@@ -88,6 +108,7 @@ export default function TournamentGroupStandingsPage() {
                   <div className="flex items-center gap-3">
                     <FolderOpen className="w-6 h-6 text-white" />
                     <h3 className="text-xl font-bold text-white">{group.groupName}</h3>
+                    <span className="text-sm text-white/80">({groupStandings.length} teams)</span>
                   </div>
                 </div>
                 
@@ -161,7 +182,10 @@ export default function TournamentGroupStandingsPage() {
           {ungroupedStandings.length > 0 && (
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
               <div className="bg-gradient-to-r from-slate-600 to-slate-700 px-6 py-4">
-                <h3 className="text-xl font-bold text-white">Ungrouped Teams</h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-bold text-white">Ungrouped Teams</h3>
+                  <span className="text-sm text-white/80">({ungroupedStandings.length} teams)</span>
+                </div>
               </div>
               
               <div className="p-4">
