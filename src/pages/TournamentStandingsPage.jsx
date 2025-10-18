@@ -4,7 +4,7 @@ import { Trophy, Medal, FolderOpen } from 'lucide-react';
 import { standingsAPI, groupsAPI, teamsAPI } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-export default function TournamentGroupStandingsPage() {
+export default function TournamentStandingsPage() {
   const { id } = useParams(); // Tournament ID
   const [standings, setStandings] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -59,10 +59,33 @@ export default function TournamentGroupStandingsPage() {
   };
 
   const getStandingsByGroup = (groupId) => {
-    return standings.filter(team => team.groupId === groupId);
+    const groupTeams = standings.filter(team => team.groupId === groupId);
+    
+    // Sort by points (descending), then by wins, then alphabetically
+    groupTeams.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      return a.teamName.localeCompare(b.teamName);
+    });
+    
+    // Assign ranks within the group
+    return groupTeams.map((team, index) => ({
+      ...team,
+      groupRank: index + 1
+    }));
   };
 
-  const ungroupedStandings = standings.filter(team => !team.groupId);
+  const ungroupedStandings = standings
+    .filter(team => !team.groupId)
+    .sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      return a.teamName.localeCompare(b.teamName);
+    })
+    .map((team, index) => ({
+      ...team,
+      groupRank: index + 1
+    }));
 
   if (loading) {
     return (
@@ -119,7 +142,7 @@ export default function TournamentGroupStandingsPage() {
                       <div key={team.teamId} className="bg-slate-50 rounded-xl p-4">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center font-bold text-white">
-                            {team.rank}
+                            {team.groupRank}
                           </div>
                           <div className="flex-1">
                             <h4 className="font-bold text-slate-800">{team.teamName}</h4>
@@ -161,7 +184,7 @@ export default function TournamentGroupStandingsPage() {
                         <tr key={team.teamId} className="hover:bg-indigo-50/50 transition-colors">
                           <td className="px-4 py-3">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center font-bold text-white text-sm">
-                              {team.rank}
+                              {team.groupRank}
                             </div>
                           </td>
                           <td className="px-4 py-3 font-bold text-slate-800">{team.teamName}</td>
@@ -195,7 +218,7 @@ export default function TournamentGroupStandingsPage() {
                     <div key={team.teamId} className="bg-slate-50 rounded-xl p-4">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center font-bold text-white">
-                          {team.rank}
+                          {team.groupRank}
                         </div>
                         <div className="flex-1">
                           <h4 className="font-bold text-slate-800">{team.teamName}</h4>

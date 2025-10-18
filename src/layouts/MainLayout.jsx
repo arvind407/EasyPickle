@@ -98,7 +98,7 @@ export default function MainLayout({ children }) {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-2xl z-40">
+      {/* <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-2xl z-40">
         <div className="grid grid-cols-5 gap-1 px-2 py-2">
           <BottomNavLink to="/" icon={Home} label="Home" active={isActive('/')} />
           <BottomNavLink to="/teams" icon={Users} label="Teams" active={isActive('/teams')} />
@@ -106,7 +106,7 @@ export default function MainLayout({ children }) {
           <BottomNavLink to="/standings" icon={BarChart3} label="Stats" active={isActive('/standings')} />
           <BottomNavLink to="/players" icon={User} label="Players" active={isActive('/players')} />
         </div>
-      </nav>
+      </nav> */}
     </div>
   );
 }

@@ -150,7 +150,6 @@ export default function TournamentTeamsPage() {
           <div className="space-y-4 sm:hidden">
             {filteredTeams.map(team => {
               const totalGames = (team.wins || 0) + (team.losses || 0);
-              const winRate = totalGames > 0 ? ((team.wins || 0) / totalGames * 100).toFixed(0) : 0;
               
               return (
                 <div 
@@ -177,10 +176,6 @@ export default function TournamentTeamsPage() {
                     <div className="text-center p-3 bg-red-50 rounded-xl">
                       <p className="text-2xl font-bold text-red-600">{team.losses || 0}</p>
                       <p className="text-xs text-slate-600 font-medium">Losses</p>
-                    </div>
-                    <div className="text-center p-3 bg-indigo-50 rounded-xl">
-                      <p className="text-2xl font-bold text-indigo-600">{winRate}%</p>
-                      <p className="text-xs text-slate-600 font-medium">Win Rate</p>
                     </div>
                   </div>
 
@@ -221,7 +216,6 @@ export default function TournamentTeamsPage() {
                     <th className="px-6 py-4 text-center text-sm font-bold">Players</th>
                     <th className="px-6 py-4 text-center text-sm font-bold">Wins</th>
                     <th className="px-6 py-4 text-center text-sm font-bold">Losses</th>
-                    <th className="px-6 py-4 text-center text-sm font-bold">Win Rate</th>
                     {(canEdit || canDelete) && (
                       <th className="px-6 py-4 text-center text-sm font-bold">Actions</th>
                     )}
@@ -230,7 +224,6 @@ export default function TournamentTeamsPage() {
                 <tbody className="divide-y divide-slate-100">
                   {filteredTeams.map(team => {
                     const totalGames = (team.wins || 0) + (team.losses || 0);
-                    const winRate = totalGames > 0 ? ((team.wins || 0) / totalGames * 100).toFixed(0) : 0;
                     
                     return (
                       <tr key={team.teamId} className="hover:bg-indigo-50/50 transition-colors">
@@ -243,8 +236,8 @@ export default function TournamentTeamsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="inline-flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg font-bold">
-                            {team.playerIds?.length || 0}
+                          <span className="inline-flex items-center justify-center px-3 py-1 bg-indigo-100 text-indigo-600 rounded-lg font-bold">
+                            {team.playerIds.join(', ')}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center">
@@ -256,19 +249,6 @@ export default function TournamentTeamsPage() {
                           <span className="font-bold text-red-600 text-lg">
                             {team.losses || 0}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="w-16 bg-slate-200 rounded-full h-2">
-                              <div 
-                                className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all"
-                                style={{ width: `${winRate}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-sm font-semibold text-slate-600 w-10">
-                              {winRate}%
-                            </span>
-                          </div>
                         </td>
                         {(canEdit || canDelete) && (
                           <td className="px-6 py-4">
