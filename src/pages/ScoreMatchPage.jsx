@@ -123,14 +123,15 @@ export default function ScoreMatchPage() {
 
   const handleFinishGame = async () => {
     if (!confirm('Are you sure you want to finish this game? This will mark the match as completed.')) return;
-    
+
     setError('');
     setSubmitting(true);
 
     try {
       // Save final score and complete the match
       await matchesAPI.score(id, score);
-      navigate('/matches');
+      // Navigate back to tournament matches page
+      navigate(`/tournament/${match.tournamentId}/matches`);
     } catch (err) {
       setError(err.message || 'Failed to save match score');
     } finally {
@@ -161,7 +162,7 @@ export default function ScoreMatchPage() {
     <div className="max-w-4xl mx-auto">
       {/* Mobile Back Button */}
       <button
-        onClick={() => navigate('/matches')}
+        onClick={() => navigate(`/tournament/${match.tournamentId}/matches`)}
         className="mb-4 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors touch-manipulation active:scale-95 sm:hidden"
       >
         <ArrowLeft className="w-5 h-5" />
@@ -383,9 +384,9 @@ export default function ScoreMatchPage() {
                   </>
                 )}
               </button>
-              <button 
-                type="button" 
-                onClick={() => navigate('/matches')} 
+              <button
+                type="button"
+                onClick={() => navigate(`/tournament/${match.tournamentId}/matches`)}
                 className="flex-1 bg-slate-200 text-slate-700 px-6 py-4 rounded-xl hover:bg-slate-300 transition-all font-bold text-base sm:text-lg touch-manipulation active:scale-95"
               >
                 Cancel
@@ -394,11 +395,11 @@ export default function ScoreMatchPage() {
           </div>
         )}
         
-        {isReadOnly && match.status === 'Completed' && (
+        {isReadOnly && (
           <div className="pt-6 border-t border-slate-200">
-            <button 
-              type="button" 
-              onClick={() => navigate('/matches')} 
+            <button
+              type="button"
+              onClick={() => navigate(`/tournament/${match.tournamentId}/matches`)}
               className="w-full bg-slate-200 text-slate-700 px-6 py-4 rounded-xl hover:bg-slate-300 transition-all font-bold text-base sm:text-lg touch-manipulation active:scale-95"
             >
               Back to Matches

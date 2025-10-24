@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Users, Plus, Edit, Trash2, Search } from 'lucide-react';
-import { teamsAPI } from '../services/api';
+import { teamsAPI, playersAPI } from '../services/api';
 import { useRole } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -13,31 +13,50 @@ export default function TournamentTeamsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+  const [players, setPlayers] = useState([]);
+
   const { canCreate, canEdit, canDelete } = useRole();
 
   useEffect(() => {
-    fetchTeams();
+    fetchData();
   }, [id]);
 
   useEffect(() => {
     filterTeams();
   }, [searchQuery, teams]);
 
-  const fetchTeams = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await teamsAPI.getAll();
-      const allTeams = response.data || [];
+      // Fetch both teams and players
+      const [teamsResponse, playersResponse] = await Promise.all([
+        teamsAPI.getAll(),
+        playersAPI.getAll()
+      ]);
+
+      const allTeams = teamsResponse.data || [];
+      const allPlayers = playersResponse.data || [];
+
       // Filter teams for this tournament
       const tournamentTeams = allTeams.filter(team => team.tournamentId === id);
       setTeams(tournamentTeams);
+      setPlayers(allPlayers);
       setError('');
     } catch (err) {
-      setError(err.message || 'Failed to load teams');
+      setError(err.message || 'Failed to load data');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to get player name by username
+  const getPlayerName = (username) => {
+    if (!username) return '-';
+    const player = players.find(p => p.username === username);
+    if (player && player.firstName && player.lastName) {
+      return `${player.firstName} ${player.lastName}`;
+    }
+    return username; // Fallback to username if player not found
   };
 
   const filterTeams = () => {
@@ -92,12 +111,12 @@ export default function TournamentTeamsPage() {
             </p>
           </div>
           {canCreate && (
-            <Link 
+            <Link
               to={`/tournament/${id}/teams/create`}
               className="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 sm:px-6 sm:py-3 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all font-semibold touch-manipulation active:scale-95"
             >
               <Plus className="w-5 h-5" />
-              <span className="hidden sm:inline">Create</span>
+              <span className="hidden sm:inline">Create Team</span>
             </Link>
           )}
         </div>
@@ -147,13 +166,13 @@ export default function TournamentTeamsPage() {
       ) : (
         <>
           {/* Mobile Card View */}
-            <div className="sm:hidden">
+          <div className="sm:hidden">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-200">
                     <th className="text-left py-2 px-2 text-sm font-semibold text-slate-600">Team</th>
-                    <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">W</th>
-                    <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">L</th>
+                    <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">Player 1</th>
+                    <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">Player 2</th>
                     {(canEdit || canDelete) && (
                       <th className="text-center py-2 px-2 text-sm font-semibold text-slate-600">Actions</th>
                     )}
@@ -164,10 +183,9 @@ export default function TournamentTeamsPage() {
                     <tr key={team.teamId} className="border-b border-slate-100">
                       <td className="py-3 px-2">
                         <p className="font-semibold text-slate-800">{team.teamName}</p>
-                        <p className="text-xs text-slate-500">{team.playerIds.join(', ')}</p>
                       </td>
-                      <td className="py-3 px-2 text-center font-semibold text-emerald-600">{team.wins || 0}</td>
-                      <td className="py-3 px-2 text-center font-semibold text-red-600">{team.losses || 0}</td>
+                      <td className="py-3 px-2 text-center font-medium text-slate-700">{getPlayerName(team.playerIds[0])}</td>
+                      <td className="py-3 px-2 text-center font-medium text-slate-700">{getPlayerName(team.playerIds[1])}</td>
                       {(canEdit || canDelete) && (
                         <td className="py-3 px-2">
                           <div className="flex gap-1 justify-center">
@@ -203,43 +221,34 @@ export default function TournamentTeamsPage() {
                 <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-bold">Team Name</th>
-                    <th className="px-6 py-4 text-center text-sm font-bold">Players</th>
-                    <th className="px-6 py-4 text-center text-sm font-bold">Wins</th>
-                    <th className="px-6 py-4 text-center text-sm font-bold">Losses</th>
+                    <th className="px-6 py-4 text-center text-sm font-bold">Player 1</th>
+                    <th className="px-6 py-4 text-center text-sm font-bold">Player 2</th>
                     {(canEdit || canDelete) && (
                       <th className="px-6 py-4 text-center text-sm font-bold">Actions</th>
                     )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredTeams.map(team => {
-                    const totalGames = (team.wins || 0) + (team.losses || 0);
-          
-                    return (
-                      <tr key={team.teamId} className="hover:bg-indigo-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                              <Users className="w-5 h-5 text-white" />
-                            </div>
-                            <span className="font-bold text-slate-800">{team.teamName}</span>
+                  {filteredTeams.map(team => (
+                    <tr key={team.teamId} className="hover:bg-indigo-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <Users className="w-5 h-5 text-white" />
                           </div>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className="inline-flex items-center justify-center px-3 py-1 bg-indigo-100 text-indigo-600 rounded-lg font-bold">
-                            {team.playerIds.join(', ')}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className="font-bold text-emerald-600 text-lg">
-                            {team.wins || 0}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className="font-bold text-red-600 text-lg">
-                            {team.losses || 0}
-                          </span>
-                        </td>
+                          <span className="font-bold text-slate-800">{team.teamName}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex items-center justify-center px-3 py-1 bg-indigo-100 text-indigo-600 rounded-lg font-bold">
+                          {getPlayerName(team.playerIds[0])}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex items-center justify-center px-3 py-1 bg-purple-100 text-purple-600 rounded-lg font-bold">
+                          {getPlayerName(team.playerIds[1])}
+                        </span>
+                      </td>
                         {(canEdit || canDelete) && (
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-center gap-2">
@@ -265,8 +274,7 @@ export default function TournamentTeamsPage() {
                           </td>
                         )}
                       </tr>
-                    );
-                  })}
+                  ))}
                 </tbody>
               </table>
             </div>

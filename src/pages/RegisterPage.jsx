@@ -125,7 +125,7 @@ export default function RegisterPage() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Join Easy Pickle
           </h1>
-          <p className="text-slate-500">Create your account to get started</p>
+          <p className="text-slate-500">Register here as a player</p>
         </div>
 
         {/* Registration Form */}
@@ -222,24 +222,6 @@ export default function RegisterPage() {
               {validationErrors.email && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
               )}
-            </div>
-
-            {/* Phone (Optional) */}
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">
-                Phone <span className="text-slate-400 font-normal">(Optional)</span>
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                  placeholder="+1 (555) 123-4567"
-                  disabled={loading}
-                />
-              </div>
             </div>
 
             {/* Password */}

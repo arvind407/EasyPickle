@@ -107,7 +107,7 @@ export default function LoginPage() {
           </form>
           
           {/* Registration Link */}
-          <div className="mt-6 text-center">
+          {/* <div className="mt-6 text-center">
             <p className="text-slate-600">
               Don't have an account?{' '}
               <Link 
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 Create Account
               </Link>
             </p>
-          </div>
+          </div> */}
         </div>
 
         <p className="text-center text-slate-400 text-sm mt-6">

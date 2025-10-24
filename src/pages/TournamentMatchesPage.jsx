@@ -1,6 +1,6 @@
 // src/pages/TournamentMatchesPage.jsx - ENHANCED VERSION
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Calendar, Plus, RefreshCw, Filter, X } from 'lucide-react';
 import { matchesAPI, teamsAPI } from '../services/api';
 import { useRole } from '../context/AuthContext';
@@ -9,18 +9,19 @@ import { formatDate } from '../utils/dateUtils';
 
 export default function TournamentMatchesPage() {
   const { id } = useParams(); // Tournament ID
+  const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [filteredMatches, setFilteredMatches] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
-  
+
   // Filter states
   const [statusFilter, setStatusFilter] = useState('All');
   const [teamFilter, setTeamFilter] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const { canCreate, canEdit } = useRole();
 
   useEffect(() => {
@@ -65,10 +66,23 @@ export default function TournamentMatchesPage() {
 
     // Filter by team
     if (teamFilter !== 'All') {
-      filtered = filtered.filter(match => 
+      filtered = filtered.filter(match =>
         match.team1Id === teamFilter || match.team2Id === teamFilter
       );
     }
+
+    // Sort by status priority: In Progress -> Completed -> Scheduled
+    const statusOrder = {
+      'In Progress': 1,
+      'Completed': 2,
+      'Scheduled': 3
+    };
+
+    filtered.sort((a, b) => {
+      const orderA = statusOrder[a.status] || 999;
+      const orderB = statusOrder[b.status] || 999;
+      return orderA - orderB;
+    });
 
     setFilteredMatches(filtered);
   };
@@ -117,17 +131,7 @@ export default function TournamentMatchesPage() {
             {canCreate ? 'Schedule and score matches' : 'View match schedule and results'}
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex-shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-700 p-3 sm:px-5 sm:py-3 rounded-xl flex items-center gap-2 transition-all font-semibold touch-manipulation active:scale-95 disabled:opacity-50"
-            title="Refresh matches"
-          >
-            <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
-          </button>
-          
+        <div className="flex gap-2">          
           {canCreate && (
             <Link 
               to="/matches/schedule" 
@@ -290,14 +294,15 @@ export default function TournamentMatchesPage() {
       ) : (
         <div className="space-y-4">
           {filteredMatches.map(match => (
-            <div 
-              key={match.matchId} 
-              className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-4 sm:p-6 border border-white/20"
+            <div
+              key={match.matchId}
+              onClick={() => navigate(`/matches/${match.matchId}/score`)}
+              className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-4 sm:p-6 border border-white/20 cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all"
             >
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4">
                 <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
-                  match.status === 'Completed' 
-                    ? 'bg-slate-500 text-white' 
+                  match.status === 'Completed'
+                    ? 'bg-slate-500 text-white'
                     : match.status === 'In Progress'
                     ? 'bg-red-500 text-white animate-pulse'
                     : 'bg-blue-500 text-white'
@@ -332,9 +337,9 @@ export default function TournamentMatchesPage() {
                     </span>
                   )}
                 </div>
-                
+
                 <span className="text-slate-400 font-bold text-lg sm:text-xl">VS</span>
-                
+
                 <div className="flex-1 text-center sm:text-left">
                   <span className="font-bold text-slate-800 text-base sm:text-lg block">
                     {match.team2Name}
@@ -347,30 +352,6 @@ export default function TournamentMatchesPage() {
                     </span>
                   )}
                 </div>
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                {match.status === 'Scheduled' && canEdit && (
-                  <Link 
-                    to={`/matches/${match.matchId}/score`} 
-                    className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all font-semibold text-center touch-manipulation active:scale-95"
-                  >
-                    Start Match
-                  </Link>
-                )}
-                
-                {match.status === 'In Progress' && canEdit && (
-                  <Link 
-                    to={`/matches/${match.matchId}/score`} 
-                    className="flex-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all font-semibold text-center flex items-center justify-center gap-2 touch-manipulation active:scale-95"
-                  >
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                    </span>
-                    Continue Scoring
-                  </Link>
-                )}
               </div>
             </div>
           ))}
