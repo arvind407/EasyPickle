@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { TournamentProvider } from './context/TournamentContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 import AdminRoute from './components/AdminRoute';
 import MainLayout from './layouts/MainLayout';
 import TournamentLayout from './layouts/TournamentLayout';
@@ -32,13 +33,13 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       
-      {/* Home - Tournaments List (accessible to all authenticated users) */}
+      {/* Home - Tournaments List (accessible to all users, including public) */}
       <Route path="/" element={
-        <ProtectedRoute>
+        <PublicRoute>
           <MainLayout>
             <TournamentsPage />
           </MainLayout>
-        </ProtectedRoute>
+        </PublicRoute>
       } />
       
       {/* Create Tournament - Admin only */}
@@ -63,37 +64,37 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Tournament Detail Routes */}
+      {/* Tournament Detail Routes (accessible to all users, including public) */}
       <Route path="/tournament/:id" element={
-        <ProtectedRoute>
+        <PublicRoute>
           <TournamentLayout>
             <TournamentHomePage />
           </TournamentLayout>
-        </ProtectedRoute>
+        </PublicRoute>
       } />
-      
+
       <Route path="/tournament/:id/matches" element={
-        <ProtectedRoute>
+        <PublicRoute>
           <TournamentLayout>
             <TournamentMatchesPage />
           </TournamentLayout>
-        </ProtectedRoute>
+        </PublicRoute>
       } />
-      
+
       <Route path="/tournament/:id/teams" element={
-        <ProtectedRoute>
+        <PublicRoute>
           <TournamentLayout>
             <TournamentTeamsPage />
           </TournamentLayout>
-        </ProtectedRoute>
+        </PublicRoute>
       } />
-      
+
       <Route path="/tournament/:id/standings" element={
-        <ProtectedRoute>
+        <PublicRoute>
           <TournamentLayout>
             <TournamentStandingsPage />
           </TournamentLayout>
-        </ProtectedRoute>
+        </PublicRoute>
       } />
       
       {/* Team Management Routes */}
@@ -148,19 +149,19 @@ function AppRoutes() {
       } />
       
       <Route path="/matches/:id/score" element={
-        <ProtectedRoute>
+        <PublicRoute>
           <MainLayout>
             <ScoreMatchPage />
           </MainLayout>
-        </ProtectedRoute>
+        </PublicRoute>
       } />
 
       <Route path="/tournament/:id/groups" element={
-        <ProtectedRoute>
+        <PublicRoute>
           <TournamentLayout>
             <TournamentGroupsPage />
           </TournamentLayout>
-        </ProtectedRoute>
+        </PublicRoute>
       } />
 
       <Route path="*" element={<Navigate to="/" replace />} />

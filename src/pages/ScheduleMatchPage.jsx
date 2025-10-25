@@ -5,13 +5,14 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function ScheduleMatchPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ 
-    tournamentId: '', 
-    team1Id: '', 
-    team2Id: '', 
-    matchDate: '', 
-    matchTime: '', 
-    court: '' 
+  const [formData, setFormData] = useState({
+    tournamentId: '',
+    team1Id: '',
+    team2Id: '',
+    matchDate: '',
+    matchTime: '',
+    court: '' ,
+    matchType: 'Practice' // Set default value
   });
   const [tournaments, setTournaments] = useState([]);
   const [teams, setTeams] = useState([]);
@@ -187,9 +188,9 @@ export default function ScheduleMatchPage() {
             <label className="block text-sm font-bold text-slate-700 mb-2">
               Match Type *
             </label>
-            <select 
-              value={formData.matchType} 
-              onChange={(e) => setFormData({...formData, matchType: e.target.value})} 
+            <select
+              value={formData.matchType}
+              onChange={(e) => setFormData({...formData, matchType: e.target.value})}
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base"
               required
             >

@@ -147,8 +147,21 @@ export function useAuth() {
 
 // Custom hook for role-based access control
 export function useRole() {
-  const { user, isAdmin, isPlayer } = useAuth();
-  
+  const { user, isAdmin, isPlayer, isAuthenticated } = useAuth();
+
+  // For unauthenticated users, return view-only permissions
+  if (!isAuthenticated) {
+    return {
+      role: null,
+      isAdmin: false,
+      isPlayer: false,
+      canEdit: false,
+      canDelete: false,
+      canCreate: false,
+      canView: true
+    };
+  }
+
   return {
     role: user?.role || null,
     isAdmin: isAdmin(),

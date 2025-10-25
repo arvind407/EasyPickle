@@ -18,7 +18,7 @@ export default function MainLayout({ children }) {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const { canCreate } = useRole();
 
   const isActive = (path) => location.pathname === path;
@@ -115,26 +115,45 @@ export default function MainLayout({ children }) {
                 <NavLink to="/standings" icon={BarChart3} label="Standings" active={isActive('/standings')} />
               </nav> */}
 
-              {canCreate && (
-                <button
-                  onClick={() => setShowPlayerModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all bg-emerald-600 text-white hover:bg-emerald-700"
-                >
-                  <UserPlus className="w-5 h-5" />
-                  <span>Add Player</span>
-                </button>
-              )}
+              {isAuthenticated ? (
+                <>
+                  {canCreate && (
+                    <button
+                      onClick={() => setShowPlayerModal(true)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all bg-emerald-600 text-white hover:bg-emerald-700"
+                    >
+                      <UserPlus className="w-5 h-5" />
+                      <span>Add Player</span>
+                    </button>
+                  )}
 
-              <div className="flex items-center gap-3 ml-4 pl-4 border-l border-slate-200">
-                <span className="text-sm text-slate-600 font-medium">Welcome, {user?.username}</span>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all text-red-600 hover:bg-red-50"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
-                </button>
-              </div>
+                  <div className="flex items-center gap-3 ml-4 pl-4 border-l border-slate-200">
+                    <span className="text-sm text-slate-600 font-medium">Welcome, {user?.username}</span>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg"
+                  >
+                    <span>Login</span>
+                  </Link>
+                  {/* <Link
+                    to="/register"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg"
+                  >
+                    <span>Register</span>
+                  </Link> */}
+                </div>
+              )}
             </div>
           </div>
           
@@ -147,28 +166,49 @@ export default function MainLayout({ children }) {
               <MobileNavLink to="/matches" icon={Calendar} label="Matches" active={isActive('/matches')} onClick={closeMenu} />
               <MobileNavLink to="/standings" icon={BarChart3} label="Standings" active={isActive('/standings')} onClick={closeMenu} />
                */}
-              {canCreate && (
-                <button
-                  onClick={() => { setShowPlayerModal(true); closeMenu(); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 touch-manipulation"
-                >
-                  <UserPlus className="w-5 h-5" />
-                  <span>Add Player</span>
-                </button>
-              )}
-              <div className="pt-4 mt-4 border-t border-slate-200">
-                <div className="px-4 py-2 text-sm text-slate-600 font-medium">
-                  👤 {user?.firstName} {user?.lastName}
+              {isAuthenticated ? (
+                <>
+                  {canCreate && (
+                    <button
+                      onClick={() => { setShowPlayerModal(true); closeMenu(); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 touch-manipulation"
+                    >
+                      <UserPlus className="w-5 h-5" />
+                      <span>Add Player</span>
+                    </button>
+                  )}
+                  <div className="pt-4 mt-4 border-t border-slate-200">
+                    <div className="px-4 py-2 text-sm text-slate-600 font-medium">
+                      👤 {user?.firstName} {user?.lastName}
+                    </div>
+                    <div className="px-4 py-1 text-xs text-slate-500">@{user?.username}</div>
+                    <button
+                      onClick={() => { handleLogout(); closeMenu(); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-red-600 hover:bg-red-50 active:bg-red-100 mt-2 touch-manipulation"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="pt-4 mt-4 space-y-2">
+                  <Link
+                    to="/login"
+                    onClick={closeMenu}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg active:scale-95 touch-manipulation"
+                  >
+                    <span>Login</span>
+                  </Link>
+                  {/* <Link
+                    to="/register"
+                    onClick={closeMenu}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg active:scale-95 touch-manipulation"
+                  >
+                    <span>Register</span>
+                  </Link> */}
                 </div>
-                <div className="px-4 py-1 text-xs text-slate-500">@{user?.username}</div>
-                <button
-                  onClick={() => { handleLogout(); closeMenu(); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-red-600 hover:bg-red-50 active:bg-red-100 mt-2 touch-manipulation"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
-                </button>
-              </div>
+              )}
             </nav>
           )}
         </div>

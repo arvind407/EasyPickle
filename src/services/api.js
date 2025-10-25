@@ -4,7 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL || "https://c45bjd0f8i.execute-api.
 // Generic API call function with error handling
 async function apiCall(endpoint, options = {}) {
   const token = localStorage.getItem('token');
-  
+
   const headers = {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` }),
@@ -19,12 +19,19 @@ async function apiCall(endpoint, options = {}) {
 
     const data = await response.json();
 
-    // Handle token expiration
-    if (response.status === 401) {
+    // Handle token expiration - only for authenticated requests
+    if (response.status === 401 && token) {
+      // Only redirect if user was authenticated (had a token)
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
       throw new Error('Session expired. Please login again.');
+    }
+
+    // For unauthenticated requests (no token), return empty data instead of error
+    if (response.status === 401 && !token) {
+      // Return empty data structure for public access
+      return { data: [], success: true };
     }
 
     if (!response.ok) {
@@ -33,6 +40,10 @@ async function apiCall(endpoint, options = {}) {
 
     return data;
   } catch (error) {
+    // If error is from network or parsing, and it's a GET request without token, return empty data
+    if (!token && options.method !== 'POST' && options.method !== 'PUT' && options.method !== 'DELETE') {
+      return { data: [], success: true };
+    }
     console.error('API Error:', error);
     throw error;
   }

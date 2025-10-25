@@ -8,7 +8,7 @@ export default function TournamentLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const { selectedTournament, clearTournament } = useTournament();
 
   const isActive = (path) => location.pathname === path;
@@ -91,17 +91,34 @@ export default function TournamentLayout({ children }) {
                   active={isActive(`/tournament/${selectedTournament?.tournamentId}/standings`)} 
                 />
               </nav>
-              
-              <div className="flex items-center gap-3 ml-4 pl-4 border-l border-slate-200">
-                <span className="text-sm text-slate-600 font-medium">Welcome, {user?.username}</span>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all text-red-600 hover:bg-red-50"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
-                </button>
-              </div>
+
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3 ml-4 pl-4 border-l border-slate-200">
+                  <span className="text-sm text-slate-600 font-medium">Welcome, {user?.username}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 ml-4 pl-4 border-l border-slate-200">
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg"
+                  >
+                    <span>Login</span>
+                  </Link>
+                  {/* <Link
+                    to="/register"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg"
+                  >
+                    <span>Register</span>
+                  </Link> */}
+                </div>
+              )}
             </div>
           </div>
           
@@ -143,7 +160,7 @@ export default function TournamentLayout({ children }) {
                 active={isActive(`/tournament/${selectedTournament?.tournamentId}/standings`)} 
                 onClick={closeMenu} 
               />
-              
+
               <div className="pt-4 mt-4 border-t border-slate-200">
                 <button
                   onClick={handleBackToTournaments}
@@ -152,18 +169,39 @@ export default function TournamentLayout({ children }) {
                   <ArrowLeft className="w-5 h-5" />
                   <span>Back to Tournaments</span>
                 </button>
-                
-                <div className="px-4 py-2 text-sm text-slate-600 font-medium mt-2">
-                  👤 {user?.firstName} {user?.lastName}
-                </div>
-                <div className="px-4 py-1 text-xs text-slate-500">@{user?.username}</div>
-                <button
-                  onClick={() => { handleLogout(); closeMenu(); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-red-600 hover:bg-red-50 active:bg-red-100 mt-2 touch-manipulation"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
-                </button>
+
+                {isAuthenticated ? (
+                  <>
+                    <div className="px-4 py-2 text-sm text-slate-600 font-medium mt-2">
+                      👤 {user?.firstName} {user?.lastName}
+                    </div>
+                    <div className="px-4 py-1 text-xs text-slate-500">@{user?.username}</div>
+                    <button
+                      onClick={() => { handleLogout(); closeMenu(); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-red-600 hover:bg-red-50 active:bg-red-100 mt-2 touch-manipulation"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Logout</span>
+                    </button>
+                  </>
+                ) : (
+                  <div className="space-y-2 mt-4">
+                    <Link
+                      to="/login"
+                      onClick={closeMenu}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg active:scale-95 touch-manipulation"
+                    >
+                      <span>Login</span>
+                    </Link>
+                    {/* <Link
+                      to="/register"
+                      onClick={closeMenu}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg active:scale-95 touch-manipulation"
+                    >
+                      <span>Register</span>
+                    </Link> */}
+                  </div>
+                )}
               </div>
             </nav>
           )}
